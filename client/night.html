@@ -1,0 +1,155 @@
+<template name="gravedigger">
+  <div class="title">
+    Night
+  </div>
+  <div class="afterTitle"></div>
+  {{#if isGravedigger}}
+    <div class="section">
+      You learn the cards of all players who died today.
+    </div>
+    {{#each killedToday}}
+      <div class="subhead">
+      {{name}}
+      </div>
+      <div class="card">
+        <div class="bigline">
+          {{alignTitle}}
+        </div>
+        <div class="text">
+          {{alignDesc}}
+        </div>
+      </div>
+      <div class="card">
+        <div class="bigline">
+          {{roleTitle}}
+        </div>
+        <div class="text">
+          {{roleDesc}}
+        </div>
+      </div>
+      <div class="space8"></div>
+    {{/each}}
+    <div class="beforeButtonSection"></div>
+    <div class="buttonSection">
+      <div class="button">Continue</div>
+    </div>
+  {{/if}}
+</template>
+
+<template name="demons">
+  <div class="title">
+    Night
+  </div>
+  <div class="afterTitle"></div>
+  {{#if isDemon}}
+    <div class="section">
+      Choose a player to curse. The Angels cannot protect that player tonight. 
+    </div>
+    <div class="space8"></div>
+    <label>
+      <input class="demonsVote" type="radio" name="player" value="_none" checked="checked">
+      None
+    </label>
+    {{#each players}}
+      <label>
+        <input class="demonsVote" type="radio" name="player" value="{{userId}}">
+        {{name}}{{#if votes}}: {{votes}}{{/if}}
+      </label>
+    {{/each}}
+  {{/if}}
+</template>
+
+<template name="angels">
+  <div class="title">
+    Night
+  </div>
+  <div class="afterTitle"></div>
+  {{#if isAngel}}
+    <div class="section">
+      Choose a player to protect from one kill tonight.
+    </div>
+    <div class="space8"></div>
+    <label>
+      <input class="angelsVote" type="radio" name="player" value="_none" checked="checked">
+      None
+    </label>
+    {{#each players}}
+      <label>
+        <input class="angelsVote" type="radio" name="player" value="{{userId}}">
+        {{name}}{{#if votes}}: {{votes}}{{/if}}
+      </label>
+    {{/each}}
+  {{/if}}
+</template>
+
+<template name="coven">
+  <div class="title">
+    Night
+  </div>
+  <div class="afterTitle"></div>
+  {{#if isCoven}}
+    <div class="section">
+      Choose a player to kill.
+    </div>
+    <div class="space8"></div>
+    <label>
+      <input class="covenVote" type="radio" name="player" value="_none" checked="checked">
+      None
+    </label>
+    {{#each players}}
+      <label>
+        <input class="covenVote" type="radio" name="player" value="{{userId}}">
+        {{name}}{{#if votes}}: {{votes}}{{/if}}
+      </label>
+    {{/each}}
+  {{/if}}
+</template>
+
+<template name="priest">
+  <div class="title">
+    Night
+  </div>
+  <div class="afterTitle"></div>
+  {{#if isPriest}}
+    <div class="section">
+      Check if a player is a member of the Witch Coven.
+    </div>
+    <div class="space8"></div>
+    {{#each players}}
+      <label>
+        <input class="priestVote" type="radio" name="player" value="{{userId}}">
+        {{name}}
+      </label>
+    {{/each}}
+    {{#if hasSecret}}
+      <div class="section">
+        {{#with secret}}
+          {{name}} {{#if isWitch}}is{{else}}is not{{/if}} a member of the Witch Coven.
+        {{/with}}
+      </div>
+      <div class="beforeButtonSection"></div>
+      <div class="buttonSection">
+        <div class="button">Continue</div>
+      </div>
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name="hunter">
+  <div class="title">
+    Night
+  </div>
+  <div class="afterTitle"></div>
+  {{#if isHunter}}
+    <div class="section">
+      You may kill a player tonight.
+    </div>
+    <div class="space8"></div>
+    {{#each players}}
+      <label>
+        <input class="hunterVote" type="radio" name="player" value="{{userId}}">
+        {{name}}
+      </label>
+    {{/each}}
+  {{/if}}
+</template>

@@ -1,0 +1,167 @@
+Template.gravedigger.helpers({
+  isGravedigger: function() {
+    var role = Roles.findOne({userId: Meteor.userId(), role: "gravedigger"});
+    return role && role.lives > 0;
+  },
+
+  killedToday: function() {
+    var role = Roles.findOne({userId: Meteor.userId(), role: "gravedigger"});
+    if (!role) {
+      throw new Meteor.Error("authorization", "only the gravedigger can see dayKilled player cards");
+    }
+    var arr = [];
+    role.secrets.graves.slice(-role.secrets.killedToday).forEach(function(killed) {
+      arr.push({
+          name: killed.name,
+          roleTitle: roleTitle(killed.role),
+          roleDesc: roleDesc(killed.role),
+          alignTitle: alignmentTitle(killed.alignment),
+          alignDesc: alignmentDesc(killed.alignment)
+      });
+    });
+    return arr;
+  }
+});
+
+Template.gravedigger.events({
+  'click .button': function() {
+    Meteor.call('nightAck', GameId, standardCallback);
+  }
+});
+
+Template.demons.helpers({
+  isDemon: function() {
+    var role = Roles.findOne({userId: Meteor.userId()});
+    return role.alignment === "coven" && role.lives < 1;
+  },
+
+  players: function() {
+    return Players.find({alive: true}, {sort: [["votes", "desc"],["name", "asc"]]});
+  }
+});
+
+Template.demons.events({
+  'change .demonsVote': function(event) {
+    var userId = event.target.value;
+    if (userId === "_none") {
+      Meteor.call('clearVote', GameId, standardCallback);
+    } else {
+      Meteor.call('demonVote', GameId, userId, standardCallback);
+    }
+  }
+});
+
+Template.angels.helpers({
+  isAngel: function() {
+    var role = Roles.findOne({userId: Meteor.userId()});
+    return (role.alignment === "town" || role.alignment === "holy") && role.lives < 1;
+  },
+
+  players: function() {
+    var cursedUser = NightCurse.findOne();
+    if (cursedUser) {
+      return Players.find({
+          alive: true,
+          userId: {$ne: cursedUser.userId}},
+          {sort: [["votes", "desc"],["name", "asc"]]
+      });
+    }
+    return Players.find({alive: true}, {sort: [["votes", "desc"],["name", "asc"]]});
+  }
+});
+
+Template.angels.events({
+  'change .angelsVote': function(event) {
+    var userId = event.target.value;
+    if (userId === "_none") {
+      Meteor.call('clearVote', GameId, standardCallback);
+    } else {
+      Meteor.call('angelVote', GameId, userId, standardCallback);
+    }
+  }
+});
+
+Template.coven.helpers({
+  isCoven: function() {
+    var role = Roles.findOne({userId: Meteor.userId()});
+    return role.alignment === "coven" && role.lives > 0;
+  },
+
+  players: function() {
+    return Players.find({alive: true}, {sort: [["votes", "desc"],["name", "asc"]]});
+  }
+});
+
+Template.coven.events({
+  'change .covenVote': function(event) {
+    var userId = event.target.value;
+    if (userId === "_none") {
+      Meteor.call('clearVote', GameId, standardCallback);
+    } else {
+      Meteor.call('covenVote', GameId, userId, standardCallback);
+    }
+  }
+});
+
+Template.priest.helpers({
+  isPriest: function() {
+    var role = Roles.findOne({userId: Meteor.userId()});
+    return role.role === "priest" && role.lives > 0;
+  },
+
+  players: function() {
+    return Players.find({alive: true});
+  },
+
+  hasSecret: function() {
+    var role = Roles.findOne({userId: Meteor.userId()});
+    if (role.role === "priest") {
+      return role.secrets.hasInvestigated;
+    }
+  },
+
+  secret: function() {
+    var role = Roles.findOne({userId: Meteor.userId()});
+    if (role.role === "priest" && role.secrets.hasInvestigated) {
+      var secrets = role.secrets.investigations;
+      return secrets[secrets.length - 1];
+    }
+  }
+});
+
+Template.priest.events({
+  'change .priestVote': function(event) {
+    var userId = event.target.value;
+    Meteor.call('priestVote', GameId, userId, function(error) {
+      if (error) {
+        alert(error);
+      } else {
+        $("input").prop('disabled', true);
+        $("input").css("display", "none");
+        $(".space8").css("display", "none");
+      }
+    });
+  },
+
+  'click .button': function() {
+    Meteor.call('nightAck', GameId, standardCallback);
+  }
+});
+
+Template.hunter.helpers({
+  isHunter: function() {
+    var role = Roles.findOne({userId: Meteor.userId()});
+    return role.role === "hunter" && role.lives > 0;
+  },
+
+  players: function() {
+    return Players.find({alive: true});
+  }
+});
+
+Template.hunter.events({
+  'change .hunterVote': function(event) {
+    var userId = event.target.value;
+    Meteor.call('hunterVote', GameId, userId, standardCallback);
+  }
+})

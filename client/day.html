@@ -1,0 +1,299 @@
+<head>
+  <link href='http://fonts.googleapis.com/css?family=Roboto:500,400' rel='stylesheet' type='text/css'>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
+  <title>Witchhunt</title>
+</head>
+
+<body>
+  {{#if view}}
+    {{> Template.dynamic template=view}}
+  {{else}}
+    {{> startScreen}}
+  {{/if}}
+</body>
+
+<template name="startScreen">
+  <div class="displayStart">
+    <div class="display1">
+      Witchhunt
+    </div>
+    <div class="space8"></div>
+    <form>
+      <input type="text" name="playerName" placeholder="Name"><br/>
+      <input type="text" name="gameId" placeholder="Game ID (blank for new game)"><br/>
+      <input type="submit">
+    </form>
+  </div>
+  <div class="displayRoles">
+    <div class="title">
+      Roles
+    </div>
+    <div class="afterTitle"></div>
+    {{#each roles}}
+      <div class="card">
+        <div class="headline">
+          {{roleTitle}}
+        </div>
+        <div class="text">
+          {{roleDesc}}
+        </div>
+      </div>
+    {{/each}}
+    <div class="space8"></div>
+  </div>
+  <div class="displayRules">
+    <div class="title">
+      Rules
+    </div>
+    <div class="afterTitle"></div>
+  </div>
+  <div class="beforeButtonSection"></div>
+  <div class="buttonSection">
+    <div class="seeRoles button">Roles</div>
+    <div class="seeRules button">Rules</div>
+  </div>
+</template>
+
+<template name="lobby">
+  <div class="title">
+    Game ID: {{gameName}}
+  </div>
+  <div class="afterTitle"></div>
+  <ul>
+    {{#each players}}
+      <li>{{name}}</li>
+    {{/each}}
+  </ul>
+  {{#if isOwner}}
+    <div class="beforeButtonSection"></div>
+    <div class="buttonSection">
+      <div class="button startGame">Start Game</div>
+    </div>
+  {{/if}}
+</template>
+
+<template name="role">
+  {{#with self}}
+    <div class="subhead">
+      {{name}}
+    </div>
+    <div class="card">
+      <div class="headline">
+        {{alignTitle}}
+      </div>
+      <div class="text">
+        {{alignDesc}}
+      </div>
+    </div>
+    <div class="card">
+      <div class="headline">
+        {{roleTitle}}
+      </div>
+      <div class="text">
+        {{roleDesc}}
+      </div>
+      {{#if secrets}}
+        <div class="text">
+          <br/>{{{secrets}}}
+        </div>
+      {{/if}}
+    </div>
+    <div class="space8"></div>
+  {{/with}}
+</template>
+
+<template name="allies">
+  {{#each allies}}
+    <div class="subhead">
+      Ally - {{name}}
+    </div>
+    <div class="card">
+      <div class="headline">
+        {{roleTitle}}
+      </div>
+      <div class="text">
+        {{roleDesc}}
+      </div>
+      {{#if secrets}}
+        <div class="text">
+          <br/>{{{secrets}}}
+        </div>
+      {{/if}}
+    </div>
+    <div class="space8"></div>
+  {{/each}}
+</template>
+
+<template name="setup">
+  <div class="title">
+    Cards
+  </div>
+  <div class="afterTitle"></div>
+  {{> role}}
+  {{#if setup}}
+    {{> Template.dynamic template=setup}}
+    {{> allies}}
+  {{else}}
+    {{> allies}}
+    <div class="beforeButtonSection"></div>
+    <div class="buttonSection">
+      <div class="button">Continue</div>
+    </div>
+  {{/if}}
+</template>
+
+<template name="apprenticeSetup">
+  <label><input class="apprenticeChoose" type="radio" name="apprentice" value="judge">Judge</label>
+  <label><input class="apprenticeChoose" type="radio" name="apprentice" value="gravedigger">Gravedigger</label>
+</template>
+
+<template name="gamblerSetup">
+  <label><input class="gamblerProtect" type="radio" name="gambler" value="odd">Odd</label>
+  <label><input class="gamblerProtect" type="radio" name="gambler" value="even">Even</label>
+</template>
+
+<template name="day">
+  <div class="title">
+    Day {{turn}}: {{timeRemaining}}
+  </div>
+  <div class="afterTitle"></div>
+  <div class="dayPlayers">
+    <div class="space8"></div>
+    <label>
+      {{#if isAlive}}
+        <input class="vote" type="radio" name="player" value="_none" checked="checked">
+      {{/if}}
+      None
+    </label>
+    {{#each players}}
+      <label>
+        {{#if isAlive}}
+          <input class="vote" type="radio" name="player" value="{{userId}}">
+        {{/if}}
+        {{name}}{{#if votes}}: {{votes}}{{/if}}
+      </label>
+    {{/each}}
+  </div>
+  <div class="dayRole">
+      {{> role}}
+      {{> allies}}
+  </div>
+  <div class="beforeButtonSection"></div>
+  <div class="buttonSection">
+    <div class="button">Cards</div>
+  </div>
+</template>
+
+<template name="judge">
+  <div class="title">
+    Judge
+  </div>
+  <div class="afterTitle"></div>
+  {{#if isJudge}}
+    <div class="space8"></div>
+    {{#each players}}
+      <label>
+        <input class="smite" type="radio" name="player" value="{{userId}}">
+        {{name}}{{#if votes}}: {{votes}}{{/if}}
+      </label>
+    {{/each}}
+  {{/if}}
+</template>
+
+<template name="preNight">
+  <div class="title">
+    Results
+  </div>
+  <div class="afterTitle"></div>
+
+  <div class="section">
+    {{#each resultDescs}}
+      {{this}}<br/>
+    {{/each}}
+  </div>
+
+  <div class="rattlePlayers">
+    <div class="space8"></div>
+    {{#each players}}
+      <label><input class="rattlePlayer" type="radio" name="player" value="{{userId}}">{{name}}</label>
+    {{/each}}
+  </div>
+
+  <div class="beforeButtonSection"></div>
+  <div class="buttonSection">
+    {{#with blockingActions}}
+      {{#if hasDeathrattle}}
+        <div class="rattle {{#if ackAvailable}}button{{else}}disabledButton{{/if}}">Activate</div>
+      {{/if}}
+      {{#if shouldBlock}}
+        <div class="ack {{#if ackAvailable}}button{{else}}disabledButton{{/if}}">Continue</div>
+      {{/if}}
+    {{/with}}
+  </div>
+</template>
+
+<template name="confirmSleep">
+  <div class="title">
+    Sleep
+  </div>
+  <div class="afterTitle"></div>
+  {{#if canAck}}
+    <div class="section">
+      Close your eyes and press the button.
+    </div>
+    <div class="bigButton">Confirm sleep</div>
+  {{/if}}
+</template>
+
+<template name="preDay">
+  <div class="title">
+    Results
+  </div>
+  <div class="afterTitle"></div>
+
+  <div class="section">
+    {{#each resultDescs}}
+      {{this}}<br/>
+    {{/each}}
+  </div>
+
+  <div class="rattleWakePlayers">
+    <div class="space8"></div>
+    {{#each players}}
+      <label><input class="rattleWakePlayer" type="radio" name="player" value="{{userId}}">{{name}}</label>
+    {{/each}}
+  </div>
+  <div class="beforeButtonSection"></div>
+  <div class="buttonSection">
+    {{#with blockingActions}}
+      {{#if hasDeathrattle}}
+        <div class="rattleWake {{#if ackAvailable}}button{{else}}disabledButton{{/if}}">Activate</div>
+      {{/if}}
+      {{#if shouldBlock}}
+        <div class="ackWake {{#if ackAvailable}}button{{else}}disabledButton{{/if}}">Continue</div>
+      {{/if}}
+    {{/with}}
+  </div>
+</template>
+
+<template name="confirmWake">
+  <div class="title">
+    Wake
+  </div>
+  <div class="afterTitle"></div>
+  {{#if canAck}}
+    <div class="section">
+      The day begins when everybody wakes up.
+    </div>
+    <div class="bigButton">Confirm wake</div>
+  {{/if}}
+</template>
+
+<template name="end">
+  <div class="title">
+    {{winner}} wins!
+  </div>
+  <div class="afterTitle"></div>
+  {{> role}}
+</template>
