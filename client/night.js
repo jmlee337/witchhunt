@@ -1,3 +1,8 @@
+// Gravedigger
+Template.gravedigger.onRendered(function() {
+  speak("gravedigger wake up");
+});
+
 Template.gravedigger.helpers({
   isGravedigger: function() {
     var role = Roles.findOne({userId: Meteor.userId(), role: "gravedigger"});
@@ -29,6 +34,15 @@ Template.gravedigger.events({
   }
 });
 
+Template.gravedigger.onDestroyed(function() {
+  speak("gravedigger go to sleep");
+});
+
+// Demons
+Template.demons.onRendered(function() {
+  speak("demons wake up");
+});
+
 Template.demons.helpers({
   isDemon: function() {
     var role = Roles.findOne({userId: Meteor.userId()});
@@ -49,6 +63,15 @@ Template.demons.events({
       Meteor.call('demonVote', GameId, userId, standardCallback);
     }
   }
+});
+
+Template.demons.onDestroyed(function() {
+  speak("demons go to sleep");
+});
+
+// Angels
+Template.angels.onRendered(function() {
+  speak("angels wake up");
 });
 
 Template.angels.helpers({
@@ -81,6 +104,15 @@ Template.angels.events({
   }
 });
 
+Template.angels.onDestroyed(function() {
+  speak("angels go to sleep");
+});
+
+// Coven
+Template.coven.onRendered(function() {
+  speak("witches wake up");
+});
+
 Template.coven.helpers({
   isCoven: function() {
     var role = Roles.findOne({userId: Meteor.userId()});
@@ -101,6 +133,15 @@ Template.coven.events({
       Meteor.call('covenVote', GameId, userId, standardCallback);
     }
   }
+});
+
+Template.coven.onDestroyed(function() {
+  speak("witches go to sleep");
+});
+
+// Priest
+Template.priest.onRendered(function() {
+  speak("priest wake up");
 });
 
 Template.priest.helpers({
@@ -148,6 +189,15 @@ Template.priest.events({
   }
 });
 
+Template.priest.onDestroyed(function() {
+  speak("priest go to sleep");
+});
+
+// Hunter
+Template.hunter.onRendered(function() {
+  speak("hunter wake up");
+});
+
 Template.hunter.helpers({
   isHunter: function() {
     var role = Roles.findOne({userId: Meteor.userId()});
@@ -164,4 +214,21 @@ Template.hunter.events({
     var userId = event.target.value;
     Meteor.call('hunterVote', GameId, userId, standardCallback);
   }
-})
+});
+
+Template.hunter.onDestroyed(function() {
+  speak("hunter go to sleep");
+});
+
+
+
+
+
+/**
+ * helpers
+ */
+speak = function(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+  }
+};

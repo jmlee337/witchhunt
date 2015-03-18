@@ -96,9 +96,9 @@ Template.lobby.events({
   }
 });
 
-Template.setup.rendered = function() {
+Template.setup.onRendered(function() {
   Meteor.subscribe("allies", GameId);
-};
+});
 
 Template.setup.helpers({
   setup: function() {
