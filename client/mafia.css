@@ -1,11 +1,13 @@
 body {
   display: flex;
+  display: -webkit-flex;
   flex-direction: column;
   font-family: "Roboto", sans-serif;
   font-size: 14px;
   margin: 0;
   min-height: 100vh;
   padding: 0;
+  -webkit-flex-direction: column;
 }
 
 form {
@@ -24,6 +26,7 @@ label {
   display: flex;
   height: 48px;
   padding: 16px;
+  -webkit-align-items: center;
 }
 
 input[type=radio] {
@@ -31,7 +34,7 @@ input[type=radio] {
 }
 
 input[type=submit] {
-  display: none;
+  visibility: hidden;
 }
 
 input[type=text] {
@@ -65,10 +68,12 @@ li {
   box-shadow: 0 5px 6px -3px rgba(0, 0, 0, 0.4);
   box-sizing: border-box;
   display: flex;
+  display: -webkit-flex;
   font-size: 34px;
   font-weight: 400;
   height: 50vh;
   padding: 16px;
+  -webkit-align-items: flex-end;
 }
 
 .title {
@@ -99,18 +104,19 @@ li {
   bottom: 0;
   box-sizing: border-box;
   display: flex;
-  flex-direction: row;
+  display: -webkit-flex;
   justify-content: flex-end;
   padding: 5px 16px;
   position: fixed;
   width: 100%;
+  -webkit-justify-content: flex-end;
   z-index: 1000;
 }
 
 .button {
   border-radius: 2px;
   box-shadow: 2px 2px 5px 0 rgba(0, 0, 0, 0.26);
-  cursor: default;
+  cursor: pointer;
   display: inline-block;
   font-weight: 500;
   margin: 0 4px;
@@ -124,7 +130,7 @@ li {
   background-color: rgba(0, 0, 0, .12);
   border-radius: 2px;
   color: rgba(0, 0, 0, .26);
-  cursor: default;
+  cursor: pointer;
   display: inline-block;
   font-weight: 500;
   margin: 0 4px;
@@ -138,8 +144,9 @@ li {
   align-items: center;
   border-radius: 2px;
   box-shadow: 2px 2px 5px 0 rgba(0, 0, 0, 0.26);
-  cursor: default;
+  cursor: pointer;
   display: flex;
+  display: -webkit-flex;
   flex-grow: 1;
   font-weight: 500;
   justify-content: center;
@@ -147,6 +154,9 @@ li {
   padding: 10px 8px 10px 8px;
   text-align: center;
   text-transform: uppercase;
+  -webkit-align-items: center;
+  -webkit-flex-grow: 1;
+  -webkit-justify-content: center;
 }
 
 .disabledBigButton {
@@ -154,8 +164,9 @@ li {
   background-color: rgba(0, 0, 0, .12);
   border-radius: 2px;
   color: rgba(0, 0, 0, .26);
-  cursor: default;
+  cursor: pointer;
   display: flex;
+  display: -webkit-flex;
   flex-grow: 1;
   font-weight: 500;
   justify-content: center;
@@ -163,6 +174,9 @@ li {
   padding: 10px 8px 10px 8px;
   text-align: center;
   text-transform: uppercase;
+  -webkit-align-items: center;
+  -webkit-flex-grow: 1;
+  -webkit-justify-content: center;
 }
 
 .card {
