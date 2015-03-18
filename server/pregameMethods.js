@@ -17,10 +17,6 @@ Meteor.methods({
 
     insertNewPlayer(userId, gameId, name);
 
-    for (var i = 0; i < 11; i++) {
-      insertNewPlayer("userId" + i, gameId, "player" + i);
-    }
-
     return gameId;
   },
   // TODO: reconnect
@@ -180,6 +176,6 @@ setupAck = function(gameId) {
   if (wakeAck(gameId, true)) {
     WakeAcks.remove({gameId: gameId});
 
-    Games.update(gameId, {$set: {view: "day"}});
+    goToDay(gameId);
   }
 };

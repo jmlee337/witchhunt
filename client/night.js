@@ -151,7 +151,7 @@ Template.priest.helpers({
   },
 
   players: function() {
-    return Players.find({alive: true});
+    return Players.find({alive: true}, {sort: [["name", "asc"]]});
   },
 
   hasSecret: function() {
@@ -205,7 +205,7 @@ Template.hunter.helpers({
   },
 
   players: function() {
-    return Players.find({alive: true});
+    return Players.find({alive: true}, {sort: [["name", "asc"]]});
   }
 });
 

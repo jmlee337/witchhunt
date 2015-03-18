@@ -1,3 +1,17 @@
+goToDay = function(gameId) {
+  Meteor.setTimeout(function() {
+    var victim = Players.findOne({alive: true, gameId: gameId}, {sort: {votes: -1}});
+    var livePlayers = numLivePlayers(gameId);
+    if (victim.votes <= (livePlayers / 2) || victim.userId === NO_KILL_ID) {
+      goToJudge(gameId);
+    } else {
+      dayKillPlayer(gameId, victim.userId, "lynch");
+      Games.update(gameId, {$set: {view: "preNight"}});
+    }
+  }, DURATION_MS);
+  Games.update(gameId, {$set: {view: "day", dayEndMs: Date.now() + DURATION_MS}, $inc: {turn: 1}});
+}
+
 // Good for day or night
 // Returns true if the vote is deciding
 vote = function(gameId, userId, numVoters) {
@@ -129,7 +143,7 @@ goToNextNightRole = function(gameId) {
 // Otherwise falls through to the next available role
 goToNightRole = function(gameId, roleName) {
   if (!maybeGoToRole(gameId, roleName)) {
-    if (roleName === "bomber") {
+    if (roleName === NIGHT_ROLES[NIGHT_ROLES.length - 1]) {
       var targets = NightTargets.find({gameId: gameId});
       targets.forEach(function(target) {
         if (target.died) {

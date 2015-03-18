@@ -167,7 +167,7 @@ Meteor.methods({
       NightKills.remove({gameId: gameId});
       WakeAcks.remove({gameId: gameId});
 
-      Games.update(gameId, {$set: {view: "day"}, $inc: {turn: 1}});
+      goToDay(gameId);
     }
   }
 });
@@ -182,18 +182,6 @@ Meteor.methods({
  */
 numLivePlayers = function(gameId) {
   return Roles.find({gameId: gameId, lives: {$gt: 0}}).count();
-};
-
-// Triggered when the timer runs out
-endDay = function(gameId) {
-  var victim = Players.findOne({alive: true, gameId: gameId}, {sort: {votes: -1}});
-  var livesPlayers = numLivePlayers(gameId);
-  if (victim.votes <= (livePlayers / 2) || victim.userId === NO_KILL_ID) {
-    goToJudge(gameId);
-  } else {
-    dayKillPlayer(gameId, victim.userId, "lynch");
-    Games.update(gameId, {$set: {view: "preNight"}});
-  }
 };
 
 // Triggered when the vote is for no lynch

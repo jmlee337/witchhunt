@@ -78,7 +78,7 @@ Template.startScreen.events({
 
 Template.lobby.helpers({
   players: function() {
-    return Players.find();
+    return Players.find({}, {sort: [["name", "asc"]]});
   },
 
   gameName: function() {
@@ -97,6 +97,7 @@ Template.lobby.events({
 });
 
 Template.setup.onRendered(function() {
+  TimeSync.resync();
   Meteor.subscribe("allies", GameId);
 });
 
@@ -129,9 +130,9 @@ Template.day.helpers({
   turn: function() {
     return Games.findOne().turn;
   },
-  // TODO: actual timer and timeout
+
   timeRemaining: function() {
-    return "8:00";
+    return moment(Games.findOne().dayEndMs - TimeSync.serverTime()).format("mm:ss");
   },
 
   isAlive: function() {
@@ -270,7 +271,7 @@ Template.preNight.helpers({
   },
 
   players: function() {
-    return Players.find({alive: true, userId: {$ne: NO_KILL_ID}});
+    return Players.find({alive: true, userId: {$ne: NO_KILL_ID}}, {sort: [["name", "asc"]]});
   }
 });
 
@@ -363,7 +364,7 @@ Template.preDay.helpers({
   },
 
   players: function() {
-    return Players.find({alive: true, userId: {$ne: NO_KILL_ID}});
+    return Players.find({alive: true, userId: {$ne: NO_KILL_ID}}, {sort: [["name", "asc"]]});
   }
 });
 

@@ -6,5 +6,7 @@
 
 meteor-platform
 artwells:accounts-guest
-accounts-base
+mizzao:timesync
+momentjs:moment
 accounts-password
+accounts-base
