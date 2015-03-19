@@ -17,7 +17,7 @@ Template.startScreen.helpers({
     });
     return arr;
   }
-})
+});
 
 Template.startScreen.events({
   'submit form': function(event) {
@@ -124,7 +124,7 @@ Template.setup.events({
     var master = event.target.value;
     Meteor.call('apprenticeChoose', GameId, master, disableCallback);
   }
-})
+});
 
 Template.day.helpers({
   turn: function() {
@@ -193,7 +193,7 @@ Template.allies.helpers({
     });
     return arr;
   }
-})
+});
 
 Template.judge.helpers({
   players: function() {
@@ -304,6 +304,10 @@ Template.confirmSleep.events({
   }
 });
 
+Template.preDay.onRendered(function () {
+  speak("everybody wake up");
+});
+
 Template.preDay.helpers({
   resultDescs: function() {
     var nightKills = NightKills.find();
@@ -400,7 +404,7 @@ Template.end.helpers({
   winner: function() {
     return Games.findOne().winner === "town" ? "Village" : "Witch Coven";
   }
-})
+});
 
 
 
