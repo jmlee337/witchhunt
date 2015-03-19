@@ -228,7 +228,7 @@ Template.hunter.onDestroyed(function() {
  * helpers
  */
 speak = function(text) {
-  if ('speechSynthesis' in window) {
+  if (window.speechSynthesis) {
     window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
   }
 };

@@ -418,6 +418,8 @@ subscribeToGame = function(gameId) {
   Meteor.subscribe("games", gameId);
   Meteor.subscribe("players", gameId);
   Meteor.subscribe("roles", gameId);
+  Meteor.subscribe("allies", gameId);
+  Meteor.subscribe("nightCurse", GameId);
   Meteor.subscribe("dayKills", gameId);
   Meteor.subscribe("dayAcks", gameId);
   Meteor.subscribe("nightKills", gameId);

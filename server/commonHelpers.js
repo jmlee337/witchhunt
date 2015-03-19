@@ -1,5 +1,8 @@
 goToDay = function(gameId) {
   Meteor.setTimeout(function() {
+    if (Games.findOne(gameId).view != "day") {
+      return;
+    }
     var victim = Players.findOne({alive: true, gameId: gameId}, {sort: {votes: -1}});
     var livePlayers = numLivePlayers(gameId);
     if (victim.votes <= (livePlayers / 2) || victim.userId === NO_KILL_ID) {

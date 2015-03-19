@@ -19,13 +19,10 @@ Meteor.methods({
 
     return gameId;
   },
-  // TODO: reconnect
+
   joinGame: function(gameId, name) {
     if (!gameId) {
       throw new Meteor.Error("argument", "no game id specified");
-    }
-    if (!name) {
-      throw new Meteor.Error("argument", "no player name specified");
     }
     var userId = Meteor.userId();
     if (!userId) {
@@ -36,11 +33,17 @@ Meteor.methods({
     if (!game) {
       throw new Meteor.Error("argument", "no game with specified game id exists");
     }
-    if (game.view != "lobby") {
-      throw new Meteor.Error("state", "game with specified gameid has already started");
-    }
 
-    insertNewPlayer(userId, gameId, name);
+    if (!Players.findOne({gameId: gameId, userId: userId})) {
+      if (game.view != "lobby") {
+        throw new Meteor.Error("state", "game with specified gameid has already started");
+      }
+      if (!name) {
+        throw new Meteor.Error("argument", "no player name specified");
+      }
+
+      insertNewPlayer(userId, gameId, name);
+    }
   },
 
   startGame: function(gameId) {
