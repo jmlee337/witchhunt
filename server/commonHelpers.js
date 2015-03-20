@@ -29,6 +29,12 @@ vote = function(gameId, userId, numVoters) {
     throw new Meteor.Error("argument", "no live user with specified user id exists");
   }
 
+  // Since no kills can happen before coven, NightTargets will only be populated if the user is voting on
+  // the second last stand kill
+  if (Games.findOne(gameId).view == "coven" && NightTargets.findOne({gameId: gameId, userId: userId})) {
+    throw new Meteor.Error("argument", "last stand cannot be used to double kill")
+  }
+
   var oldVote = Votes.findOne({userId:Meteor.userId(), gameId: gameId});
   if (oldVote) {
     Players.update({userId: oldVote.voteId, gameId: gameId}, {$inc: {votes: -1}});
@@ -98,6 +104,7 @@ clearPlayerVotes = function(gameId) {
 };
 
 // Sets game state to a role if the role exists and the player is alive
+// TODO: Timeout
 maybeGoToRole = function(gameId, roleName) {
   if (roleName === "demons") {
     if (Roles.find({gameId: gameId, alignment: "coven", lives: {$lt: 1}}).count() > 0) {

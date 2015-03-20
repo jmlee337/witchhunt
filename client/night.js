@@ -119,6 +119,15 @@ Template.coven.helpers({
     return role.alignment === "coven" && role.lives > 0;
   },
 
+  isLastStand: function() {
+    return Roles.findOne({userId: Meteor.userId()}).secrets.lastStand;
+  },
+
+  usedLastStand: function() {
+    var lastStand = Roles.findOne({userId: Meteor.userId()}).secrets.lastStand;
+    return lastStand != null && !lastStand;
+  },
+
   players: function() {
     return Players.find({alive: true}, {sort: [["votes", "desc"],["name", "asc"]]});
   }

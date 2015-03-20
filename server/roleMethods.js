@@ -73,13 +73,20 @@ Meteor.methods({
     if (!Roles.findOne({userId: Meteor.userId(), gameId: gameId, alignment: "coven", lives: {$gt: 0}})) {
       throw new Meteor.Error("authorization", "not authorized to covenVote");
     }
-    var numCoven = Roles.find({gameId: gameId, alignment: "coven", lives: {$gt: 0}}).count();
+    var witches = Roles.find({gameId: gameId, alignment: "coven", lives: {$gt: 0}});
+    var numCoven = witches.count();
     if (vote(gameId, userId, numCoven)) {
       if (userId != NO_KILL_ID) {
         nightKillPlayer(gameId, userId);
       }
       clearPlayerVotes(gameId);
-      goToNextNightRole(gameId);
+      if (numCoven == 1 && witches.fetch()[0].secrets.lastStand) {
+        var secrets = witches.fetch()[0].secrets;
+        secrets.lastStand = false;
+        Roles.update({gameId: gameId, alignment: "coven", lives: {$gt: 0}}, {$set: {secrets: secrets}});
+      } else {
+        goToNextNightRole(gameId);
+      }
     }
   },
 

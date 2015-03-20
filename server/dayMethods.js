@@ -129,6 +129,14 @@ Meteor.methods({
         Roles.update({userId: priest.userId, gameId: gameId}, {$set: {secrets: secrets}});
       }
 
+      // Set up last stand
+      var witches = Roles.find({alignment: "coven", gameId: gameId, lives: {$gt: 0}});
+      if (witches.count() == 1) {
+        var secrets = witches.fetch()[0].secrets;
+        secrets.lastStand = true;
+        Roles.update({alignment: "coven", gameId: gameId, lives: {$gt: 0}}, {$set: {secrets: secrets}});
+      }
+
       clearPlayerVotes(gameId);
       DayKills.remove({gameId: gameId});
       DayAcks.remove({gameId: gameId});

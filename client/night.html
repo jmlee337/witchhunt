@@ -90,6 +90,12 @@
   {{#if isCoven}}
     <div class="section">
       Choose a player to kill.
+      {{#if isLastStand}}
+        <br/>You are the last Witch alive. You may kill two players tonight.
+      {{/if}}
+      {{#if usedLastStand}}
+        <br/>You are the last Witch alive. You may kill two players tonight. Choose another player to kill.
+      {{/if}}
     </div>
     <div class="space8"></div>
     <label>

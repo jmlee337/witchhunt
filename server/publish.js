@@ -20,7 +20,8 @@ Meteor.publish("dayAcks", function(gameId) {
   return DayAcks.find({userId: this.userId, gameId: gameId});
 });
 Meteor.publish("nightCurse", function(gameId) {
-  if (!Players.findOne({userId: this.userId, gameId: gameId}).alive) {
+  var player = Players.findOne({userId: this.userId, gameId: gameId});
+  if (player && !player.alive) {
     return NightCurse.find({gameId: gameId});
   }
 });

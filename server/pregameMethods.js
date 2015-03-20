@@ -17,6 +17,10 @@ Meteor.methods({
 
     insertNewPlayer(userId, gameId, name);
 
+    for (var i = 0; i < 6; i++) {
+      insertNewPlayer("user" + i, gameId, "player" + i);
+    }
+
     return gameId;
   },
 
