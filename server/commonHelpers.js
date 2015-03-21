@@ -104,6 +104,10 @@ clearPlayerVotes = function(gameId) {
 };
 
 maybeGoToRole = function(gameId, roleName) {
+  if (roleName === "preNight") {
+    Games.update(gameId, {$set: {view: "preNight"}});
+    return true;
+  }
   if (roleName === "demons") {
     if (Roles.find({gameId: gameId, alignment: "coven", lives: {$lt: 1}}).count() > 0) {
       setRoleTimeout(gameId, roleName);
@@ -166,16 +170,17 @@ setRoleTimeout = function(gameId, roleName) {
       return;
     }
     goToNextNightRole(gameId);
-  }, TIMEOUT_MS);
-  Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS}});
+  }, TIMEOUT_MS + GRACE_MS);
+  Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS + GRACE_MS}});
 };
 
+// TOOD: Base on average time or something. Or at least make variant.
 setRandomTimeout = function(gameId) {
   var timeout_ms = TIMEOUT_MS / 2;
   Meteor.setTimeout(function() {
     goToNextNightRole(gameId);
-  }, timeout_ms);
-  Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS}});
+  }, timeout_ms + GRACE_MS);
+  Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS + GRACE_MS}});
 };
 
 goToNextNightRole = function(gameId) {

@@ -195,6 +195,10 @@ Template.allies.helpers({
   }
 });
 
+Template.judge.onRendered(function() {
+  speak("everybody go to sleep. judge wake up");
+});
+
 Template.judge.helpers({
   players: function() {
     return Players.find({alive: true}, {sort: [["votes", "desc"],["name", "asc"]]});
@@ -203,6 +207,10 @@ Template.judge.helpers({
   isJudge: function() {
     var role = Roles.findOne({userId: Meteor.userId()});
     return role.role === "judge" && role.lives > 0;
+  },
+
+  timeRemaining: function() {
+    return moment(Games.findOne().dayEndMs - TimeSync.serverTime()).format("mm:ss");
   }
 });
 
@@ -211,6 +219,10 @@ Template.judge.events({
     var userId = event.target.value;
     Meteor.call('judgeSmite', GameId, userId, standardCallback);
   }
+});
+
+Template.judge.onDestroyed(function() {
+  speak("everybody wake up");
 });
 
 Template.preNight.helpers({

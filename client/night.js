@@ -10,21 +10,20 @@ Template.gravedigger.helpers({
   },
 
   killedToday: function() {
-    var role = Roles.findOne({userId: Meteor.userId(), role: "gravedigger"});
-    if (!role) {
-      throw new Meteor.Error("authorization", "only the gravedigger can see dayKilled player cards");
-    }
-    var arr = [];
-    role.secrets.graves.slice(-role.secrets.killedToday).forEach(function(killed) {
-      arr.push({
-          name: killed.name,
-          roleTitle: roleTitle(killed.role),
-          roleDesc: roleDesc(killed.role),
-          alignTitle: alignmentTitle(killed.alignment),
-          alignDesc: alignmentDesc(killed.alignment)
+    var role = Roles.findOne({userId: Meteor.userId()});
+    if (role.role === "gravedigger") {
+      var arr = [];
+      role.secrets.graves.slice(-role.secrets.killedToday).forEach(function(killed) {
+        arr.push({
+            name: killed.name,
+            roleTitle: roleTitle(killed.role),
+            roleDesc: roleDesc(killed.role),
+            alignTitle: alignmentTitle(killed.alignment),
+            alignDesc: alignmentDesc(killed.alignment)
+        });
       });
-    });
-    return arr;
+      return arr;
+    }
   },
 
   timeRemaining: function() {

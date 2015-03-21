@@ -1,3 +1,17 @@
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Roboto'), local('Roboto-Regular'), url('Roboto-Regular-webfont.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 500;
+    src: local('Roboto Medium'), local('Roboto-Medium'), url('Roboto-Medium-webfont.woff') format('woff');
+}
+
 body {
   display: flex;
   display: -webkit-flex;
