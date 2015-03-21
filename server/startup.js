@@ -1,3 +1,4 @@
+/*
 Meteor.startup(function() {
   Games.remove({});
   Players.remove({});
@@ -10,3 +11,4 @@ Meteor.startup(function() {
   NightKills.remove({});
   WakeAcks.remove({});
 });
+*/
