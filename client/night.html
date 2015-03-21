@@ -4,6 +4,7 @@
   </div>
   <div class="afterTitle"></div>
   {{#if isGravedigger}}
+    <div class="space16"></div>
     <div class="section">
       You learn the cards of all players who died today.
     </div>
@@ -42,6 +43,7 @@
   </div>
   <div class="afterTitle"></div>
   {{#if isDemon}}
+    <div class="space16"></div>
     <div class="section">
       Choose a player to curse. The Angels cannot protect that player tonight. 
     </div>
@@ -65,6 +67,7 @@
   </div>
   <div class="afterTitle"></div>
   {{#if isAngel}}
+    <div class="space16"></div>
     <div class="section">
       Choose a player to protect from one kill tonight.
     </div>
@@ -88,6 +91,7 @@
   </div>
   <div class="afterTitle"></div>
   {{#if isCoven}}
+    <div class="space16"></div>
     <div class="section">
       Choose a player to kill.
       {{#if isLastStand}}
@@ -117,6 +121,7 @@
   </div>
   <div class="afterTitle"></div>
   {{#if isPriest}}
+    <div class="space16"></div>
     <div class="section">
       Check if a player is a member of the Witch Coven.
     </div>
@@ -128,6 +133,7 @@
       </label>
     {{/each}}
     {{#if hasSecret}}
+      <div class="space16"></div>
       <div class="section">
         {{#with secret}}
           {{name}} {{#if isWitch}}is{{else}}is not{{/if}} a member of the Witch Coven.
@@ -147,6 +153,7 @@
   </div>
   <div class="afterTitle"></div>
   {{#if isHunter}}
+    <div class="space16"></div>
     <div class="section">
       You may kill a player tonight.
     </div>

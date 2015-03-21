@@ -32,8 +32,17 @@ Template.startScreen.events({
           GameId = gameId;
         }
       });
-    } else {
+    } else if (playerName) {
       Meteor.call('newGame', playerName, function(error, result) {
+        if (error) {
+          alert(error);
+        } else {
+          subscribeToGame(result);
+          GameId = result;
+        }
+      });
+    } else {
+      Meteor.call('reconnect', function(error, result) {
         if (error) {
           alert(error);
         } else {
@@ -47,17 +56,6 @@ Template.startScreen.events({
 
   'focus input': function() {
     $(".display1").animate({height: "72px"}, 250);
-  },
-
-  'click .reconnect': function() {
-    Meteor.call('reconnect', function(error, result) {
-      if (error) {
-        alert(error);
-      } else {
-        subscribeToGame(result);
-        GameId = result;
-      }
-    });
   },
 
   'click .seeRoles': function() {

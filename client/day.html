@@ -19,7 +19,7 @@
     </div>
     <div class="space8"></div>
     <form>
-      <input type="text" name="playerName" placeholder="Name"><br/>
+      <input type="text" name="playerName" placeholder="Name (blank to reconnect)"><br/>
       <input type="text" name="gameId" placeholder="Game ID (blank for new game)"><br/>
       <input type="submit">
     </form>
@@ -46,10 +46,61 @@
       Rules
     </div>
     <div class="afterTitle"></div>
+    <div class="space16"></div>
+    <div class="section">
+      Witchhunt is a social deduction game, like Mafia or Werewolf. If you know how to play one of
+      those, you're most of the way there already! Witchhunt uses the following variations on those
+      games:
+    </div>
+    <div class="subhead">
+      Dead players are not eliminated
+    </div>
+    <div class="section">
+      In death, Villagers become Angels and Witches become Demons. Dead players wield massive
+      influence and can be as much of a factor in winning the game for their team as the living!
+    </div>
+    <div class="section">
+      Each night the Angels select a player to protect from one kill. The Demons select one player
+      that the Angels cannot protect.
+    </div>
+    <div class="subhead"> 
+      Special abilities for all
+    </div>
+    <div class="section">
+      Every player gets a unique character with a simple special ability. This works because every
+      player gets two cards: One for their team, and one for their character. This also means
+      someone like the Survivalist could be either a Villager or a Witch.
+    </div>
+    <div class="subhead">
+      Last stand
+    </div>
+    <div class="section">
+      The last Witch alive may kill two players every night. This leads to more consistent results
+      (less of one team getting ahead an dominating) and many three player showdowns at the end.
+    </div>
+    <div class="subhead">
+      No flip
+    </div>
+    <div class="section">
+      Players do not reveal their cards upon dying.
+    </div>
+    <div class="subhead">
+      Using this app
+    </div>
+    <div class="section">
+      Normally, you'd have to designate a person to run the game. With this app, everybody gets to
+      play! Just input your votes and actions, while also vocalizing them like you normally would.
+    </div>
+    <div class="subhead">
+      About
+    </div>
+    <div class="section">
+      Witchhunt designed by <a href="http://witchhuntgame.net/" target="_blank">Kyle Brockman</a><br/>
+      App by <a href="https://github.com/jmlee337/witchhunt" target="_blank">Jeremy Lee</a><br/>
+    </div>
   </div>
   <div class="beforeButtonSection"></div>
   <div class="buttonSection">
-    <div class="reconnect button">Reconnect</div>
     <div class="seeRoles button">Roles</div>
     <div class="seeRules button">Rules</div>
   </div>
@@ -206,7 +257,7 @@
     Results
   </div>
   <div class="afterTitle"></div>
-
+  <div class="space16"></div>
   <div class="section">
     {{#each resultDescs}}
       {{this}}<br/>
@@ -239,6 +290,7 @@
   </div>
   <div class="afterTitle"></div>
   {{#if canAck}}
+    <div class="space16"></div>
     <div class="section">
       Close your eyes and press the button.
     </div>
@@ -251,7 +303,7 @@
     Results
   </div>
   <div class="afterTitle"></div>
-
+  <div class="space16"></div>
   <div class="section">
     {{#each resultDescs}}
       {{this}}<br/>
@@ -283,6 +335,7 @@
   </div>
   <div class="afterTitle"></div>
   {{#if canAck}}
+    <div class="space16"></div>
     <div class="section">
       The day begins when everybody wakes up.
     </div>
