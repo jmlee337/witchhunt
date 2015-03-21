@@ -49,6 +49,17 @@ Template.startScreen.events({
     $(".display1").animate({height: "72px"}, 250);
   },
 
+  'click .reconnect': function() {
+    Meteor.call('reconnect', function(error, result) {
+      if (error) {
+        alert(error);
+      } else {
+        subscribeToGame(result);
+        GameId = result;
+      }
+    });
+  },
+
   'click .seeRoles': function() {
     var roles = $(".displayRoles");
     var start = $(".displayStart");

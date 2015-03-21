@@ -46,6 +46,18 @@ Meteor.methods({
     }
   },
 
+  reconnect: function() {
+    var userId = Meteor.userId();
+    if (!userId) {
+      throw new Meteor.Error("state", "no player id available");
+    }
+    var player = Players.findOne({userId: userId}, {sort: [["createdMs", "desc"]]});
+    if (!player) {
+      throw new Meteor.Error("state", "no record of this player");
+    }
+    return player.gameId;
+  },
+
   startGame: function(gameId) {
     if (!gameId) {
       throw new Meteor.Error("argument", "no game id specified");
@@ -145,7 +157,8 @@ insertNewPlayer = function(id, gameId, name) {
     gameId: gameId,
     name: name,
     alive: true,
-    votes: 0
+    votes: 0,
+    createdMs: Date.now()
   });
 };
 
