@@ -25,6 +25,10 @@ Template.gravedigger.helpers({
       });
     });
     return arr;
+  },
+
+  timeRemaining: function() {
+    return moment(Games.findOne().dayEndMs - TimeSync.serverTime()).format("mm:ss");
   }
 });
 
@@ -51,6 +55,10 @@ Template.demons.helpers({
 
   players: function() {
     return Players.find({alive: true}, {sort: [["votes", "desc"],["name", "asc"]]});
+  },
+
+  timeRemaining: function() {
+    return moment(Games.findOne().dayEndMs - TimeSync.serverTime()).format("mm:ss");
   }
 });
 
@@ -90,6 +98,10 @@ Template.angels.helpers({
       });
     }
     return Players.find({alive: true}, {sort: [["votes", "desc"],["name", "asc"]]});
+  },
+
+  timeRemaining: function() {
+    return moment(Games.findOne().dayEndMs - TimeSync.serverTime()).format("mm:ss");
   }
 });
 
@@ -130,6 +142,10 @@ Template.coven.helpers({
 
   players: function() {
     return Players.find({alive: true}, {sort: [["votes", "desc"],["name", "asc"]]});
+  },
+
+  timeRemaining: function() {
+    return moment(Games.findOne().dayEndMs - TimeSync.serverTime()).format("mm:ss");
   }
 });
 
@@ -176,6 +192,10 @@ Template.priest.helpers({
       var secrets = role.secrets.investigations;
       return secrets[secrets.length - 1];
     }
+  },
+
+  timeRemaining: function() {
+    return moment(Games.findOne().dayEndMs - TimeSync.serverTime()).format("mm:ss");
   }
 });
 
@@ -215,6 +235,10 @@ Template.hunter.helpers({
 
   players: function() {
     return Players.find({alive: true}, {sort: [["name", "asc"]]});
+  },
+
+  timeRemaining: function() {
+    return moment(Games.findOne().dayEndMs - TimeSync.serverTime()).format("mm:ss");
   }
 });
 

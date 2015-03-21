@@ -546,7 +546,8 @@ secretsDesc = function(secrets) {
   }
   if (secrets.odd != null) {
     var odd = secrets.odd;
-    var isTurnOdd = Games.findOne().turn % 2 == 1;
+    var turn = Games.findOne().turn;
+    var isTurnOdd = turn == 0 || turn % 2 == 1;
     var desc = "You are protected from one kill on " + (odd ? "odd" : "even") + " nights.";
     return desc + " You " + (odd == isTurnOdd ? "will" : "will not") + " have protection tonight.";
   }

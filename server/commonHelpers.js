@@ -103,46 +103,79 @@ clearPlayerVotes = function(gameId) {
   Votes.remove({gameId: gameId});
 };
 
-// Sets game state to a role if the role exists and the player is alive
-// TODO: Timeout
 maybeGoToRole = function(gameId, roleName) {
   if (roleName === "demons") {
     if (Roles.find({gameId: gameId, alignment: "coven", lives: {$lt: 1}}).count() > 0) {
-      Games.update(gameId, {$set: {view: "demons"}});
-      return true;
+      setRoleTimeout(gameId, roleName);
+    } else {
+      setRandomTimeout(gameId);
     }
-    return false;
+    Games.update(gameId, {$set: {view: "demons"}});
+    return true;
   }
   if (roleName === "angels") {
     if (Roles.find({
         gameId: gameId, 
         $or: [{alignment: "town"}, {alignment: "holy"}], 
         lives: {$lt: 1}}).count() > 0) {
-      Games.update(gameId, {$set: {view: "angels"}});
-      return true;
+      setRoleTimeout(gameId, roleName);
+    } else {
+      setRandomTimeout(gameId);
     }
-    return false;
+    Games.update(gameId, {$set: {view: "angels"}});
+    return true;
   }
   if (roleName === "coven") {
     if (Roles.find({gameId: gameId, alignment: "coven", lives: {$gt: 0}}).count() > 0) {
-      Games.update(gameId, {$set: {view: "coven"}});
-      return true;
+      setRoleTimeout(gameId, roleName);
+    } else {
+      setRandomTimeout(gameId);
     }
-    return false;
+    Games.update(gameId, {$set: {view: "coven"}});
+    return true;
   }
   if (roleName === "hunter") {
-    var hunter = Roles.findOne({gameId: gameId, role: "hunter", lives: {$gt: 0}});
+    var hunter = Roles.findOne({gameId: gameId, role: "hunter"});
     if (hunter && hunter.secrets.tonightWeHunt) {
+      if (hunter.lives > 0) {
+        setRoleTimeout(gameId, roleName);
+      } else {
+        setRandomTimeout(gameId);
+      }
       Games.update(gameId, {$set: {view: "hunter"}});
       return true;
     }
     return false;
   }
-  if (Roles.findOne({gameId: gameId, role: roleName, lives: {$gt: 0}})) {
+  var rolePlayer = Roles.findOne({gameId: gameId, role: roleName});
+  if (rolePlayer) {
+    if (rolePlayer.lives > 0) {
+      setRoleTimeout(gameId, roleName);
+    } else {
+      setRandomTimeout(gameId);
+    }
     Games.update(gameId, {$set: {view: roleName}});
     return true;
   }
   return false;
+};
+
+setRoleTimeout = function(gameId, roleName) {
+  Meteor.setTimeout(function() {
+    if (Games.findOne(gameId).view != roleName) {
+      return;
+    }
+    goToNextNightRole(gameId);
+  }, TIMEOUT_MS);
+  Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS}});
+};
+
+setRandomTimeout = function(gameId) {
+  var timeout_ms = TIMEOUT_MS / 2;
+  Meteor.setTimeout(function() {
+    goToNextNightRole(gameId);
+  }, timeout_ms);
+  Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS}});
 };
 
 goToNextNightRole = function(gameId) {

@@ -17,10 +17,6 @@ Meteor.methods({
 
     insertNewPlayer(userId, gameId, name);
 
-    for (var i = 0; i < 6; i++) {
-      insertNewPlayer("user" + i, gameId, "player" + i);
-    }
-
     return gameId;
   },
 
@@ -97,7 +93,7 @@ Meteor.methods({
 
     insertNewPlayer(NO_KILL_ID, gameId, "Vote to do nothing");
 
-    Games.update(gameId, {$set: {view: "setup", turn: 1}});
+    Games.update(gameId, {$set: {view: "setup", turn: 0}});
   },
 
   setupAck: function(gameId) {
