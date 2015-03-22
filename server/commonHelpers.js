@@ -164,23 +164,73 @@ maybeGoToRole = function(gameId, roleName) {
   return false;
 };
 
-setRoleTimeout = function(gameId, roleName) {
-  Meteor.setTimeout(function() {
-    if (Games.findOne(gameId).view != roleName) {
-      return;
-    }
-    goToNextNightRole(gameId);
-  }, TIMEOUT_MS + GRACE_MS);
-  Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS + GRACE_MS}});
-};
-
-// TOOD: Base on average time or something. Or at least make variant.
+// TODO: Base on average time or something. Or at least make variant.
 setRandomTimeout = function(gameId) {
   var timeout_ms = TIMEOUT_MS / 2;
   Meteor.setTimeout(function() {
     goToNextNightRole(gameId);
   }, timeout_ms + GRACE_MS);
   Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS + GRACE_MS}});
+};
+
+setRoleTimeout = function(gameId, roleName) {
+  Meteor.setTimeout(function() {
+    var view = Games.findOne(gameId).view;
+    if (view != roleName) {
+      return;
+    }
+    if (view === "coven") {
+      var victim = Players.findOne({votes: {$gt: 0}}, {sort: [["votes", "desc"]]});
+      if (victim) {
+        covenEndResolve(gameId, victim.userId);
+        return;
+      }
+    } else if (view === "demons") {
+      var victim = Players.findOne({votes: {$gt: 0}}, {sort: [["votes", "desc"]]});
+      if (victim) {
+        demonsEndResolve(gameId, victim.userId);
+        return;
+      }
+    } else if (view === "angels") {
+      var victim = Players.findOne({votes: {$gt: 0}}, {sort: [["votes", "desc"]]});
+      if (victim) {
+        angelsEndResolve(gameId, victim.userId);
+        return;
+      }
+    }
+    goToNextNightRole(gameId);
+  }, TIMEOUT_MS + GRACE_MS);
+  Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS + GRACE_MS}});
+};
+
+covenEndResolve = function(gameId, userId) {
+  if (userId != NO_KILL_ID) {
+    nightKillPlayer(gameId, userId);
+  }
+  clearPlayerVotes(gameId);
+  goToNextNightRole(gameId);
+};
+
+demonsEndResolve = function(gameId, userId) {
+  if (userId != NO_KILL_ID) {
+    NightCurse.insert({
+      userId: userId,
+      gameId: gameId
+    });
+  }
+  clearPlayerVotes(gameId);
+  goToNextNightRole(gameId);
+};
+
+angelsEndResolve = function(gameId, userId) {
+  if (userId != NO_KILL_ID) {
+    NightShields.upsert({
+      userId: userId,
+      gameId: gameId
+    }, {$inc: {shields: 1}});
+  }
+  clearPlayerVotes(gameId);
+  goToNextNightRole(gameId);
 };
 
 goToNextNightRole = function(gameId) {

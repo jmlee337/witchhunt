@@ -99,14 +99,7 @@ Meteor.methods({
     }
     var numDemons = Roles.find({gameId: gameId, alignment: "coven", lives: {$lt: 1}}).count();
     if (vote(gameId, userId, numDemons)) {
-      if (userId != NO_KILL_ID) {
-        NightCurse.insert({
-          userId: userId,
-          gameId: gameId
-        });
-      }
-      clearPlayerVotes(gameId);
-      goToNextNightRole(gameId);
+      nightEndResolve(gameId, userId);
     }
   },
 
@@ -129,14 +122,7 @@ Meteor.methods({
         $or: [{alignment: "town"}, {alignment: "holy"}], 
         lives: {$lt: 1}}).count();
     if (vote(gameId, userId, numAngels)) {
-      if (userId != NO_KILL_ID) {
-        NightShields.upsert({
-          userId: userId,
-          gameId: gameId
-        }, {$inc: {shields: 1}});
-      }
-      clearPlayerVotes(gameId);
-      goToNextNightRole(gameId);
+      angelsEndResolve(gameId, userId);
     }
   },
 
