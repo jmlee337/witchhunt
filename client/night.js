@@ -260,7 +260,7 @@ Template.hunter.onDestroyed(function() {
  * helpers
  */
 speak = function(text) {
-  if (window.speechSynthesis) {
+  if (SPEECH_ENABLED && window.speechSynthesis) {
     window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
   }
 };
