@@ -55,14 +55,10 @@ Meteor.methods({
 
   startGame: function(gameId) {
     check(gameId, String);
-    var game = Games.findOne(gameId);
-    if (!game) {
-      throw new Meteor.Error("argument", "no game with specified game id exists");
-    }
-    if (game.userId !== Meteor.userId()) {
+    checkUserGame(gameId);
+    if (Games.findOne(gameId).userId !== Meteor.userId()) {
       throw new Meteor.Error("authorization", "user is not the owner of the specified game");
     }
-
     var players = Players.find({gameId: gameId});
     var numPlayers = players.count();
     if (numPlayers < 7 || numPlayers > 12) {
@@ -96,7 +92,7 @@ Meteor.methods({
                   name: innocent.name}}}});
     }
 
-    insertNewPlayer(NO_KILL_ID, gameId, "Vote to do nothing");
+    insertNewPlayer(NO_KILL_ID, gameId, NO_KILL_STRING);
 
     Games.update(gameId, {$set: {view: "setup", turn: 0}});
   },
