@@ -182,8 +182,8 @@ genRolePairs = function(n) {
     var spliced = roleArr.splice(index, 1);
     arr.push({alignment: "coven", role: spliced[0]});
   }
-  for (var i = 0; i < n - (numScum + 2); i++) {
-    arr.push({alignment: "town", role: roleArr[i]});
+  for (var j = 0; j < n - (numScum + 2); j++) {
+    arr.push({alignment: "town", role: roleArr[j]});
   }
   return shuffle(arr);
 };
