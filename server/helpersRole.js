@@ -1,6 +1,3 @@
-dummy3 = function() {
-
-};
 /**
  * External (public)
  */
