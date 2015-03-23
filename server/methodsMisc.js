@@ -1,8 +1,6 @@
 Meteor.methods({
   clearVote: function(gameId) {
-    if (!gameId) {
-      throw new Meteor.Error("argument", "no game id specified");
-    }
+    check(gameId, String);
     var unauthorized = false;
     switch (Games.findOne(gameId).view) {
       case "day":

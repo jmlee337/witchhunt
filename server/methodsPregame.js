@@ -1,8 +1,6 @@
 Meteor.methods({
   newGame: function(name) {
-    if (!name) {
-      throw new Meteor.Error("argument", "no player name specified");
-    }
+    check(name, String);
     var userId = Meteor.userId();
     if (!userId) {
       throw new Meteor.Error("state", "no player id available");
@@ -21,9 +19,7 @@ Meteor.methods({
   },
 
   joinGame: function(gameId, name) {
-    if (!gameId) {
-      throw new Meteor.Error("argument", "no game id specified");
-    }
+    check(gameId, String);
     var userId = Meteor.userId();
     if (!userId) {
       throw new Meteor.Error("state", "no player id available");
@@ -35,11 +31,10 @@ Meteor.methods({
     }
 
     if (!Players.findOne({gameId: gameId, userId: userId})) {
+      // normal case, else reconnect
+      check(name, String);
       if (game.view != "lobby") {
         throw new Meteor.Error("state", "game with specified gameid has already started");
-      }
-      if (!name) {
-        throw new Meteor.Error("argument", "no player name specified");
       }
 
       insertNewPlayer(userId, gameId, name);
@@ -59,9 +54,7 @@ Meteor.methods({
   },
 
   startGame: function(gameId) {
-    if (!gameId) {
-      throw new Meteor.Error("argument", "no game id specified");
-    }
+    check(gameId, String);
     var game = Games.findOne(gameId);
     if (!game) {
       throw new Meteor.Error("argument", "no game with specified game id exists");
@@ -109,23 +102,22 @@ Meteor.methods({
   },
 
   setupAck: function(gameId) {
-    if (Games.findOne(gameId).view != "setup") {
-      throw new Meteor.Error("state", "setupAck can only be called during setup");
-    }
+    check(gameId, String);
+    checkGameState(gameId, "setup");
+    checkUserGame(gameId);
+
     setupAck(gameId);
   },
 
   apprenticeChoose: function(gameId, master) {
-    if (master != "gravedigger" && master != "judge") {
-      throw new Meteor.Error("argument", "master must be gravedigger or judge");
-    }
-    if (Games.findOne(gameId).view != "setup") {
-      throw new Meteor.Error("state", "apprenticeChoose can only be called during setup");
-    }
-    var user = Roles.findOne({userId: Meteor.userId(), gameId: gameId});
-    if (user.role != "apprentice") {
-      throw new Meteor.Error("authorization", "apprenticeChoose can only be called by the apprentice");
-    }
+    check(gameId, String);
+    checkGameState(gameId, "setup");
+    checkUserGame(gameId);
+    checkUserRole(gameId, "apprentice");
+    check(master, Match.Where(function(master) {
+      check(master, String);
+      return master === "gravedigger" || master === "judge";
+    }));
 
     var masterRole = Roles.findOne({gameId: gameId, role: master});
     var masterPlayer = Players.findOne({userId: masterRole.userId, gameId: gameId});
@@ -135,20 +127,15 @@ Meteor.methods({
   },
 
   gamblerChoose: function(gameId, odd) {
+    check(gameId, String);
+    checkGameState(gameId, "setup");
+    checkUserGame(gameId);
+    checkUserRole(gameId, "gambler");
     check(odd, Boolean);
-    if (Games.findOne(gameId).view != "setup") {
-      throw new Meteor.Error("state", "gamblerChoose can only be called during setup");
-    }
-    var user = Roles.findOne({userId: Meteor.userId(), gameId: gameId});
-    if (user.role != "gambler") {
-      throw new Meteor.Error("authorization", "gamblerChoose can only be called by the gambler");
-    }
 
     Roles.update({userId: Meteor.userId(), gameId: gameId}, {$set: {secrets: {odd: odd}}});
     setupAck(gameId);
   }
-
-  // TODO: offline failsafe
 });
 
 insertNewPlayer = function(id, gameId, name) {

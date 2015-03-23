@@ -3,17 +3,8 @@
  */
 // Returns true if the vote is deciding
 vote = function(gameId, userId, numVoters) {
-  if (!gameId) {
-    throw new Meteor.Error("argument", "no game id specified");
-  }
-  if (!userId) {
-    throw new Meteor.Error("argument", "no user id specified");
-  }
-  // This check must refernce Players and not Roles to keep secrets during night
-  if (!Players.findOne({userId: userId, gameId: gameId, alive: true})) {
-    throw new Meteor.Error("argument", "no live user with specified user id exists");
-  }
-
+  check(numVoters, Number);
+  checkTarget(gameId, userId);
   // Since no kills can happen before coven, NightTargets will only be populated if the user is voting on
   // the second last stand kill
   if (Games.findOne(gameId).view == "coven" && NightTargets.findOne({gameId: gameId, userId: userId})) {

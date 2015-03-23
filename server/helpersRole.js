@@ -102,7 +102,7 @@ maybeGoToRole = function(gameId, roleName) {
   if (roleName === "hunter") {
     var hunter = Roles.findOne({gameId: gameId, role: "hunter"});
     if (hunter && hunter.secrets.tonightWeHunt) {
-      if (hunter.lives > 0) {
+      if (Players.findOne({gameId: gameId, userId: hunter.userId, alive: true})) {
         setRoleTimeout(gameId, roleName);
       } else {
         setRandomTimeout(gameId);
@@ -114,7 +114,7 @@ maybeGoToRole = function(gameId, roleName) {
   }
   var rolePlayer = Roles.findOne({gameId: gameId, role: roleName});
   if (rolePlayer) {
-    if (rolePlayer.lives > 0) {
+    if (Players.findOne({gameId: gameId, userId: rolePlayer.userId, alive: true})) {
       setRoleTimeout(gameId, roleName);
     } else {
       setRandomTimeout(gameId);

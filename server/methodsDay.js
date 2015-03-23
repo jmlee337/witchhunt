@@ -1,11 +1,14 @@
 Meteor.methods({
   dayVote: function(gameId, userId) {
-    if (Games.findOne(gameId).view != "day") {
-      throw new Meteor.Error("state", "dayVote can only be called during day");
-    }
+    check(gameId, String);
+    checkGameState(gameId, "day");
+    checkUserGame(gameId);
+    checkUserLive(gameId);
+    check(userId, String);
     if (!Roles.findOne({userId: Meteor.userId(), gameId: gameId, lives: {$gt: 0}})) {
       throw new Meteor.Error("authorization", "not authorized to dayVote");
     }
+
     if (vote(gameId, userId, numLivePlayers(gameId))) {
       if (userId === NO_KILL_ID) {
         goToRole(gameId, "judge");
@@ -17,9 +20,10 @@ Meteor.methods({
   },
 
   preNightAck: function(gameId) {
-    if (Games.findOne(gameId).view != "preNight") {
-      throw new Meteor.Error("state", "preNightAck can only be called during preNight");
-    }
+    check(gameId, String);
+    checkGameState(gameId, "preNight");
+    checkUserGame(gameId);
+
     if (dayAck(gameId, false)) {
       DayAcks.remove({gameId: gameId});
       if (hasGameEnded(gameId)) {
@@ -31,23 +35,14 @@ Meteor.methods({
   },
 
   confirmSleepAck: function(gameId) {
+    check(gameId, String);
+    checkGameState(gameId, "confirmSleep");
+    checkUserGame(gameId);
     var game = Games.findOne(gameId);
-    if (game.view != "confirmSleep") {
-      throw new Meteor.Error("state", "confirmSleepAck can only be called during confirmSleep");
-    }
-    if (dayAck(gameId, true)) {
-      // DAY TO NIGHT
-      var dayKilled = DayKills.find({gameId: gameId});
 
-      // Give gambler protection
-      var gambler = Roles.findOne({role: "gambler", gameId: gameId, lives: {$gt: 0}});
-      if (gambler && (game.turn % 2 == 1) == gambler.secrets.odd) {
-        NightShields.insert({
-          userId: gambler.userId,
-          gameId: gameId,
-          shields: 1
-        });
-      }
+    if (dayAck(gameId, true)) {
+      // This was the last Ack. Day is over, go to night
+      var dayKilled = DayKills.find({gameId: gameId});
 
       // Check for hunter/apprentice
       checkKilledPlayers(gameId, dayKilled);
@@ -77,6 +72,16 @@ Meteor.methods({
         }
       }
 
+      // Give gambler protection
+      var gambler = Roles.findOne({role: "gambler", gameId: gameId, lives: {$gt: 0}});
+      if (gambler && (game.turn % 2 == 1) == gambler.secrets.odd) {
+        NightShields.insert({
+          userId: gambler.userId,
+          gameId: gameId,
+          shields: 1
+        });
+      }
+
       // Reset priest
       var priest = Roles.findOne({role: "priest", gameId: gameId, lives: {$gt: 0}});
       if (priest) {
@@ -102,9 +107,10 @@ Meteor.methods({
   },
 
   preDayAck: function(gameId) {
-    if (Games.findOne(gameId).view != "preDay") {
-      throw new Meteor.Error("state", "preDayAck can only be called during preDay");
-    }
+    check(gameId, String);
+    checkGameState(gameId, "preDay");
+    checkUserGame(gameId);
+
     if (wakeAck(gameId, false)) {
       WakeAcks.remove({gameId: gameId});
       if (hasGameEnded(gameId)) {
@@ -116,11 +122,11 @@ Meteor.methods({
   },
 
   confirmWakeAck: function(gameId) {
-    if (Games.findOne(gameId).view != "confirmWake") {
-      throw new Meteor.Error("state", "confirmWakeAck can only be called during confirmWake");
-    }
+    check(gameId, String);
+    checkGameState(gameId, "confirmWake");
+    checkUserGame(gameId);
+
     if (wakeAck(gameId, true)) {
-      // Check for hunter/apprentice
       checkKilledPlayers(gameId, NightKills.find({gameId: gameId}));
 
       Players.update({gameId: gameId}, {$set: {votes: 0}}, {multi: true});
@@ -136,15 +142,11 @@ Meteor.methods({
   },
 
   judgeSmite: function(gameId, userId) {
-    if (!gameId) {
-      throw new Meteor.Error("argument", "no game id specified");
-    }
-    if (!userId) {
-      throw new Meteor.Error("argument", "no user id specified");
-    }
-    if (!Roles.findOne({userId: Meteor.userId(), gameId: gameId, role: "judge", lives: {$gt: 0}})) {
-      throw new Meteor.Error("authorization", "not authorized to smite");
-    }
+    check(gameId, String);
+    checkGameState(gameId, "judge");
+    checkUserGame(gameId);
+    checkUserLive(gameId);
+    checkUserRole(gameId, "judge");
 
     if (userId != NO_KILL_ID) {
       dayKillPlayer(gameId, userId, "smite");
@@ -153,20 +155,19 @@ Meteor.methods({
   },
 
   deathRattle: function(gameId, targetId) {
-    if (!gameId) {
-      throw new Meteor.Error("argument", "no game id specified");
-    }
+    check(gameId, String);
+    checkUserGame(gameId);
     var userId = Meteor.userId();
     var role = Roles.findOne({userId: userId, gameId: gameId});
     if (!role || !(role.role === "bod" || role.role === "dob")) {
       throw new Meteor.Error("authorization", "this player doesn't have a deathrattle");
     }
     if (role.secrets.used) {
-      throw new Meteor.Error("authorization", "this player has already deathrattled");
+      throw new Meteor.Error("state", "this player has already deathrattled");
     }
     if (!DayKills.findOne({userId: userId, gameId: gameId, died: true}) &&
         !NightKills.findOne({userId: userId, gameId: gameId, died: true})) {
-      throw new Meteor.Error("authorization", "this player cannot deathrattle now");
+      throw new Meteor.Error("state", "this player cannot deathrattle now");
     }
     var state = Games.findOne(gameId).view;
     if (!(state === "preNight" || state === "preDay")) {
@@ -224,9 +225,6 @@ numLivePlayers = function(gameId) {
 // Writes a document to DayAcks, returns true if all expected acks are in.
 dayAck = function(gameId, excludeKilled) {
   check(excludeKilled, Boolean);
-  if (!gameId) {
-    throw new Meteor.Error("argument", "no game id specified");
-  }
   var userId = Meteor.userId();
   var player = Players.findOne({userId: userId, gameId: gameId});
   if (!player.alive) {
@@ -276,9 +274,6 @@ hasGameEnded = function(gameId) {
 
 wakeAck = function(gameId, excludeKilled) {
   check(excludeKilled, Boolean);
-  if (!gameId) {
-    throw new Meteor.Error("argument", "no game id specified");
-  }
   var userId = Meteor.userId();
   var player = Players.findOne({userId: userId, gameId: gameId});
   if (!player.alive) {
