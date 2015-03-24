@@ -122,9 +122,8 @@ maybeGoToRole = function(gameId, roleName) {
   return false;
 };
 
-// TODO: Base on average time or something. Or at least make variant.
 setRandomTimeout = function(gameId) {
-  var timeout_ms = TIMEOUT_MS / 2;
+  var timeout_ms =  Math.floor((Math.random() + Math.random()) / 2 * TIMEOUT_MS);
   Meteor.setTimeout(function() {
     goToNextRole(gameId);
   }, timeout_ms + GRACE_MS);
