@@ -72,14 +72,26 @@ Meteor.methods({
       i++;
     });
 
+    // setup priest
+    if (Roles.findOne({gameId: gameId, role: "priest"})) {
+      Roles.update({gameId: gameId, role: "priest"}, {$set: {secrets: {investigations: []}}});
+    }
+
+    // setup oracle
+    if (Roles.findOne({gameId: gameId, role: "oracle"})) {
+      Roles.update({gameId: gameId, role: "oracle"}, {$set: {secrets: {holies: []}}});
+    }
+
     // setup acolyte
-    var priestRole = Roles.findOne({gameId: gameId, role: "priest"});
-    var priest = Players.findOne({gameId: gameId, userId: priestRole.userId});
-    Roles.update({gameId: gameId, role: "acolyte"}, {$set: {
-        secrets: {
-            priest: {
-                id: priest.userId, 
-                name: priest.name}}}});
+    if (Roles.findOne({gameId: gameId, role: "acolyte"})) {
+      var priestRole = Roles.findOne({gameId: gameId, role: "priest"});
+      var priest = Players.findOne({gameId: gameId, userId: priestRole.userId});
+      Roles.update({gameId: gameId, role: "acolyte"}, {$set: {
+          secrets: {
+              priest: {
+                  id: priest.userId, 
+                  name: priest.name}}}});
+    }
 
     // setup peepingTom
     if (Roles.findOne({gameId: gameId, role: "peepingTom"})) {
@@ -175,6 +187,6 @@ setupAck = function(gameId) {
   if (wakeAck(gameId, true)) {
     WakeAcks.remove({gameId: gameId});
 
-    goToDay(gameId);
+    Games.update(gameId, {$set: {view: "confirmWake"}});
   }
 };

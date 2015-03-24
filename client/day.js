@@ -87,7 +87,7 @@ Template.startScreen.events({
 
 Template.lobby.helpers({
   players: function() {
-    return Players.find({}, {sort: [["name", "asc"]]});
+    return Players.find({}, {sort: [["createdMs", "asc"]]});
   },
 
   gameName: function() {
@@ -174,13 +174,27 @@ Template.role.helpers({
     var userId = Meteor.userId();
     var user = Roles.findOne({userId: userId});
     var name = Players.findOne({userId: userId}).name;
+    var secrets = user.secrets;
+
+    var oldMaster;
+    if (user.secrets.master && user.role != "apprentice") {
+      var oldSecrets = {master: user.secrets.master};
+      oldMaster = {
+          roleTitle: roleTitle("apprentice"),
+          roleDesc: roleDesc("apprentice"),
+          secrets: secretsDesc(oldSecrets)
+      };
+      secrets = {graves: secrets.graves};
+    }
+
     return {
         name: name,
         alignTitle: alignmentTitle(user.alignment),
         alignDesc: alignmentDesc(user.alignment),
         roleTitle: roleTitle(user.role),
         roleDesc: roleDesc(user.role), 
-        secrets: secretsDesc(user.secrets)
+        secrets: secretsDesc(secrets),
+        oldMaster: oldMaster
     };
   }
 });

@@ -150,6 +150,19 @@
         </div>
       {{/if}}
     </div>
+    {{#with oldMaster}}
+      <div class="card">
+        <div class="headline">
+          {{roleTitle}}
+        </div>
+        <div class="text">
+          {{roleDesc}}
+        </div>
+        <div class="text">
+          <br/>{{{secrets}}}
+        </div>
+      </div>
+    {{/with}}
     <div class="space8"></div>
   {{/with}}
 </template>

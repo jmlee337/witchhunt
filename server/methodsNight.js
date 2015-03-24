@@ -5,6 +5,7 @@ Meteor.methods({
     checkGameState(gameId, Roles.findOne({userId: Meteor.userId(), gameId: gameId}).role);
     checkUserLive(gameId);
 
+    clearViewTimeout(gameId, Games.findOne(gameId).view);
     goToNextRole(gameId);
   },
 
@@ -19,6 +20,7 @@ Meteor.methods({
     var witches = Roles.find({gameId: gameId, alignment: "coven", lives: {$gt: 0}});
     var numCoven = witches.count();
     if (vote(gameId, userId, numCoven)) {
+      clearViewTimeout(gameId, "coven");
       if (userId != NO_KILL_ID) {
         nightKillPlayer(gameId, userId);
       }
@@ -43,6 +45,7 @@ Meteor.methods({
 
     var numDemons = Roles.find({gameId: gameId, alignment: "coven", lives: {$lt: 1}}).count();
     if (vote(gameId, userId, numDemons)) {
+      clearViewTimeout(gameId, "demons");
       demonsEndResolve(gameId, userId);
     }
   },
@@ -63,6 +66,7 @@ Meteor.methods({
         $or: [{alignment: "town"}, {alignment: "holy"}], 
         lives: {$lt: 1}}).count();
     if (vote(gameId, userId, numAngels)) {
+      clearViewTimeout(gameId, "angels");
       angelsEndResolve(gameId, userId);
     }
   },
@@ -80,10 +84,7 @@ Meteor.methods({
     } else {
       var player = checkTarget(gameId, userId);
 
-      var secrets = self.secrets;
-      if (!secrets.investigations) {
-        secrets.investigations = [];
-      }
+      var secrets = Roles.findOne({userId: Meteor.userId(), gameId: gameId}).secrets;
       var target = Roles.findOne({userId: userId, gameId: gameId});
       secrets.investigations.push({
         id: userId,
@@ -107,6 +108,7 @@ Meteor.methods({
       throw new Meteor.Error("state", "no my son, your time has not yet come");
     }
 
+    clearViewTimeout(gameId, "hunter");
     if (userId != NO_KILL_ID) {
       checkTarget(gameId, userId);
 

@@ -10,6 +10,7 @@ Meteor.methods({
     }
 
     if (vote(gameId, userId, numLivePlayers(gameId))) {
+      clearViewTimeout(gameId, "day");
       if (userId === NO_KILL_ID) {
         goToRole(gameId, "judge");
       } else {
@@ -59,11 +60,11 @@ Meteor.methods({
           dayKilled.forEach(function(player) {
             if (player.died) {
               var role = Roles.findOne({userId: player.userId, gameId: gameId});
-              secrets.graves.push({
+              graveSecrets.graves.push({
                 id: player.userId,
                 name: player.name,
                 alignment: role.alignment,
-                role: role.role
+                role: role.secrets.master ? "apprentice" : role.role
               });
               graveSecrets.killedToday++;
             }
@@ -129,15 +130,28 @@ Meteor.methods({
     if (wakeAck(gameId, true)) {
       checkKilledPlayers(gameId, NightKills.find({gameId: gameId}));
 
-      Players.update({gameId: gameId}, {$set: {votes: 0}}, {multi: true});
-      Votes.remove({gameId: gameId});
+      clearPlayerVotes(gameId);
       NightShields.remove({gameId: gameId});
       NightCurse.remove({gameId: gameId});
       NightTargets.remove({gameId: gameId});
       NightKills.remove({gameId: gameId});
       WakeAcks.remove({gameId: gameId});
 
-      goToDay(gameId);
+      var timeoutId = Meteor.setTimeout(function() {
+        if (Games.findOne(gameId).view != "day") {
+          return;
+        }
+        var victim = Players.findOne({alive: true, gameId: gameId}, {sort: {votes: -1}});
+        var livePlayers = numLivePlayers(gameId);
+        if (victim.votes <= (livePlayers / 2) || victim.userId === NO_KILL_ID) {
+          goToRole(gameId, "judge");
+        } else {
+          dayKillPlayer(gameId, victim.userId, "lynch");
+          Games.update(gameId, {$set: {view: "preNight"}});
+        }
+      }, DURATION_MS);
+      Timeouts.upsert({gameId: gameId, view: "day"}, {$set: {id: timeoutId}});
+      Games.update(gameId, {$set: {view: "day", dayEndMs: Date.now() + DURATION_MS}, $inc: {turn: 1}});
     }
   },
 
@@ -148,6 +162,7 @@ Meteor.methods({
     checkUserLive(gameId);
     checkUserRole(gameId, "judge");
 
+    clearViewTimeout(gameId, "judge");
     if (userId != NO_KILL_ID) {
       dayKillPlayer(gameId, userId, "smite");
     }
@@ -218,10 +233,6 @@ Meteor.methods({
 /**
  * Server helpers code
  */
-numLivePlayers = function(gameId) {
-  return Roles.find({gameId: gameId, lives: {$gt: 0}}).count();
-};
-
 // Writes a document to DayAcks, returns true if all expected acks are in.
 dayAck = function(gameId, excludeKilled) {
   check(excludeKilled, Boolean);
@@ -248,21 +259,22 @@ dayAck = function(gameId, excludeKilled) {
 };
 
 hasGameEnded = function(gameId) {
-  var numCoven = Roles.find({gameId: gameId, alignment: "coven"}).count();
+  var numCoven = Roles.find({gameId: gameId, alignment: "coven", lives: {$gt: 0}}).count();
   if (numCoven === 0) {
     Games.update(gameId, {$set: {winner: "town"}});
     return true;
   }
-  var numTown = Roles.find({gameId: gameId, $or: [{alignment: "town"}, {alignment: "holy"}]}).count();
+  var numTown = Roles.find(
+      {gameId: gameId, $or: [{alignment: "town"}, {alignment: "holy"}], lives: {$gt: 0}}).count();
   if (numCoven > numTown) {
     Games.update(gameId, {$set: {winner: "coven"}});
     return true;
   }
   if (numCoven == numTown) {
-    if (Roles.findOne({gameId: gameId, role: "judge", alignment: "town"})) {
+    if (Roles.findOne({gameId: gameId, role: "judge", alignment: "town", lives: {$gt: 0}})) {
       return false;
     }
-    var hunter = Roles.findOne({gameId: gameId, role: "hunter", alignment: "town"});
+    var hunter = Roles.findOne({gameId: gameId, role: "hunter", alignment: "town", lives: {$gt: 0}});
     if (hunter && !hunter.secrets.used) {
       return false;
     }
@@ -270,47 +282,6 @@ hasGameEnded = function(gameId) {
     return true;
   }
   return false;
-};
-
-wakeAck = function(gameId, excludeKilled) {
-  check(excludeKilled, Boolean);
-  var userId = Meteor.userId();
-  var player = Players.findOne({userId: userId, gameId: gameId});
-  if (!player.alive) {
-    if (excludeKilled || !NightKills.findOne({userId: player.userId})) {
-      throw new Meteor.Error("authorization", "this user is not allowed to ack");
-    }
-  }
-  if (WakeAcks.findOne({userId: userId, gameId: gameId})) {
-    throw new Meteor.Error("state", "this user already acked");
-  }
-
-  WakeAcks.insert({
-    userId: userId, 
-    gameId: gameId,
-  });
-
-  var livePlayers = numLivePlayers(gameId);
-  var killedPlayers = excludeKilled ? 0 : NightKills.find({gameId: gameId, died: true}).count();
-  var actualAcks = WakeAcks.find({gameId: gameId}).count();
-  return actualAcks == livePlayers + killedPlayers;
-};
-
-goToDay = function(gameId) {
-  Meteor.setTimeout(function() {
-    if (Games.findOne(gameId).view != "day") {
-      return;
-    }
-    var victim = Players.findOne({alive: true, gameId: gameId}, {sort: {votes: -1}});
-    var livePlayers = numLivePlayers(gameId);
-    if (victim.votes <= (livePlayers / 2) || victim.userId === NO_KILL_ID) {
-      goToRole(gameId, "judge");
-    } else {
-      dayKillPlayer(gameId, victim.userId, "lynch");
-      Games.update(gameId, {$set: {view: "preNight"}});
-    }
-  }, DURATION_MS);
-  Games.update(gameId, {$set: {view: "day", dayEndMs: Date.now() + DURATION_MS}, $inc: {turn: 1}});
 };
 
 // Check Day/NightKilled players and update hunter/apprentice appropriately
@@ -333,7 +304,7 @@ checkKilledPlayers = function(gameId, players) {
   if (masterId || hunterActive) {
     players.forEach(function(player) {
       if (masterId && masterId === player.userId && player.died) {
-        Roles.update({userId: apprentice.userId, gameId: gameId}, {$set: {role: masterRole, secrets: {}}});
+        Roles.update({userId: apprentice.userId, gameId: gameId}, {$set: {role: masterRole}});
       }
       if (hunterActive && !player.died) {
         Roles.update({userId: hunter.userId, gameId: gameId}, {$set: {secrets: {tonightWeHunt: true}}});

@@ -28,9 +28,6 @@ goToRole = function(gameId, roleName) {
       var oracle = Roles.findOne({gameId: gameId, role: "oracle"}); // oracle still gets info when dead
       if (oracle && killed.count() > 0) {
         var secrets = oracle.secrets;
-        if (!secrets.holies) {
-          secrets.holies = [];
-        }
         killed.forEach(function(player) {
           if (Roles.findOne({userId: player.userId, gameId: gameId, alignment: "holy"})) {
             secrets.holies.push({id: player.userId, name: player.name});
@@ -112,7 +109,7 @@ maybeGoToRole = function(gameId, roleName) {
     }
     return false;
   }
-  var rolePlayer = Roles.findOne({gameId: gameId, role: roleName});
+  var rolePlayer = Roles.findOne({gameId: gameId, role: roleName}, {sort: [["lives", "desc"]]});
   if (rolePlayer) {
     if (Players.findOne({gameId: gameId, userId: rolePlayer.userId, alive: true})) {
       setRoleTimeout(gameId, roleName);
@@ -135,7 +132,7 @@ setRandomTimeout = function(gameId) {
 };
 
 setRoleTimeout = function(gameId, roleName) {
-  Meteor.setTimeout(function() {
+  var timeoutId = Meteor.setTimeout(function() {
     var view = Games.findOne(gameId).view;
     if (view != roleName) {
       return;
@@ -163,5 +160,6 @@ setRoleTimeout = function(gameId, roleName) {
     }
     goToNextRole(gameId);
   }, TIMEOUT_MS + GRACE_MS);
+  Timeouts.upsert({gameId: gameId, view: roleName}, {$set: {id: timeoutId}});
   Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS + GRACE_MS}});
 };

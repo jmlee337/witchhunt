@@ -11,7 +11,7 @@ Template.gravedigger.helpers({
 
   killedToday: function() {
     var role = Roles.findOne({userId: Meteor.userId()});
-    if (role.role === "gravedigger") {
+    if (role.role === "gravedigger" && role.secrets.killedToday > 0) {
       var arr = [];
       role.secrets.graves.slice(-role.secrets.killedToday).forEach(function(killed) {
         arr.push({
@@ -170,8 +170,9 @@ Template.priest.onRendered(function() {
 
 Template.priest.helpers({
   isPriest: function() {
-    var role = Roles.findOne({userId: Meteor.userId()});
-    return role.role === "priest" && role.lives > 0;
+    var isRole = Roles.findOne({userId: Meteor.userId(), role: "priest"});
+    var isAlive = Players.findOne({userId: Meteor.userId()}).alive;
+    return isRole && isAlive;
   },
 
   players: function() {
@@ -206,7 +207,7 @@ Template.priest.events({
         alert(error);
       } else {
         $("input").prop('disabled', true);
-        $("input").css("display", "none");
+        $("label").css("display", "none");
         $(".space8").css("display", "none");
       }
     });
@@ -228,8 +229,9 @@ Template.hunter.onRendered(function() {
 
 Template.hunter.helpers({
   isHunter: function() {
-    var role = Roles.findOne({userId: Meteor.userId()});
-    return role.role === "hunter" && role.lives > 0;
+    var isRole = Roles.findOne({userId: Meteor.userId(), role: "hunter"});
+    var isAlive = Players.findOne({userId: Meteor.userId()}).alive;
+    return isRole && isAlive;
   },
 
   players: function() {
