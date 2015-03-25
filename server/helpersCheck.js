@@ -1,3 +1,9 @@
+checkGameExists = function(gameId) {
+  if (!Games.findOne(gameId)) {
+    throw new Meteor.Error("argument", "game does not exist");
+  }
+};
+
 checkGameState = function(gameId, stateName) {
   if (Games.findOne(gameId).view != stateName) {
     throw new Meteor.Error("state", "can only be called during " + stateName);

@@ -10,3 +10,5 @@ mizzao:timesync
 momentjs:moment
 accounts-password
 accounts-base
+sanjo:jasmine
+velocity:html-reporter

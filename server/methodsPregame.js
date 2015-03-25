@@ -20,22 +20,16 @@ Meteor.methods({
 
   joinGame: function(gameId, name) {
     check(gameId, String);
+    checkGameExists(gameId);
     var userId = Meteor.userId();
     if (!userId) {
       throw new Meteor.Error("state", "no player id available");
     }
 
-    var game = Games.findOne(gameId);
-    if (!game) {
-      throw new Meteor.Error("argument", "no game with specified game id exists");
-    }
-
     if (!Players.findOne({gameId: gameId, userId: userId})) {
       // normal case, else reconnect
       check(name, String);
-      if (game.view != "lobby") {
-        throw new Meteor.Error("state", "game with specified gameid has already started");
-      }
+      checkGameState(gameId, "lobby");
 
       insertNewPlayer(userId, gameId, name);
     }
@@ -55,6 +49,7 @@ Meteor.methods({
 
   startGame: function(gameId) {
     check(gameId, String);
+    checkGameState(gameId, "lobby");
     checkUserGame(gameId);
     if (Games.findOne(gameId).userId !== Meteor.userId()) {
       throw new Meteor.Error("authorization", "user is not the owner of the specified game");
