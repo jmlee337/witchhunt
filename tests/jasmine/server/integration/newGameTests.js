@@ -48,13 +48,9 @@ Jasmine.onTest(function() {
       Meteor.call("newGame", NAME, function(error, result) {
         expect(error).toBeUndefined();
 
-        var player = Players.findOne();
-        expect(player.userId).toBe(USER_ID);
-        expect(player.gameId).toBe(GAME_ID);
-        expect(player.name).toBe(NAME);
-        expect(player.alive).toBe(true);
-        expect(player.votes).toBe(0);
-        expect(player.createdMs).toBe(NOW_MS);
+        expect(Players.findOne()).toEqual(jasmine.objectContaining({
+          gameId: GAME_ID, userId: USER_ID, name: NAME, alive: true, votes: 0, createdMs: NOW_MS
+        }));
 
         jasmine.clock().uninstall();
         done();
