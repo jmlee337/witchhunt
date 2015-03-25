@@ -9,7 +9,7 @@ clearViewTimeout = function(gameId, view) {
 };
 
 numLivePlayers = function(gameId) {
-  return Roles.find({gameId: gameId, lives: {$gt: 0}}).count();
+  return Players.find({gameId: gameId, alive: true, userId: {$ne: NO_KILL_ID}}).count();
 };
 
 wakeAck = function(gameId, excludeKilled) {

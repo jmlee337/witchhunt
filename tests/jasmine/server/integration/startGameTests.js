@@ -226,7 +226,7 @@ Jasmine.onTest(function() {
       });
     });
 
-    it("sends game to setup", function(done) {
+    it("moves game to setup", function(done) {
       addPlayers(6); // 7 total
 
       Meteor.call("startGame", GAME_ID, function(error, result) {
