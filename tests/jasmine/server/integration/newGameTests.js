@@ -10,12 +10,6 @@ Jasmine.onTest(function() {
       Players.remove({});
     });
 
-    it("requires a name", function() {
-      expect(function() {
-        Meteor.call("newGame");
-      }).toThrow();
-    });
-
     it("requires a Meteor user id", function() {
       spyOn(Meteor, "userId").and.returnValue(undefined);
 

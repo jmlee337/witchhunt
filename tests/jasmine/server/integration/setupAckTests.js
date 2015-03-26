@@ -13,24 +13,10 @@ Jasmine.onTest(function() {
       Games.remove({});
       Players.remove({});
       WakeAcks.remove({});
-    })
-
-    it("requires a gameId", function() {
-      expect(function() {
-        Meteor.call("setupAck");
-      }).toThrow();
     });
 
     it("requires game to be in setup", function() {
       Games.update({}, {$set: {view: "not setup"}});
-
-      expect(function() {
-        Meteor.call("setupAck", GAME_ID);
-      }).toThrow();
-    });
-
-    it("requires player to be in the game", function() {
-      Players.update({}, {$set: {gameId: "not the right gameId"}});
 
       expect(function() {
         Meteor.call("setupAck", GAME_ID);

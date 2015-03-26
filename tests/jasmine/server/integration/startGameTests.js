@@ -163,13 +163,9 @@ Jasmine.onTest(function() {
       Roles.remove({});
     });
 
-    it("requires a gameId", function() {
-      expect(function() {
-        Meteor.call("startGame");
-      }).toThrow();
-    });
-
     it("requires game to be in lobby", function() {
+      addPlayers(6); // 7 total
+
       Games.update({}, {$set: {view: "not lobby"}});
       
       expect(function() {
@@ -177,15 +173,9 @@ Jasmine.onTest(function() {
       }).toThrow();
     });
 
-    it("requires player to be in the game", function() {
-      Players.update({}, {$set: {gameId: "not the right gameId"}});
-
-      expect(function() {
-        Meteor.call("startGame", GAME_ID);
-      }).toThrow();
-    });
-
     it("requires player to be owner of the game", function() {
+      addPlayers(6); // 7 total
+
       Games.update({}, {$set: {userId: "not the right userId"}});
 
       expect(function() {

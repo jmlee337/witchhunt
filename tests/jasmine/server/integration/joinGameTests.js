@@ -14,25 +14,11 @@ Jasmine.onTest(function() {
       Players.remove({});
     });
 
-    it("requires a gameId", function() {
-      expect(function() {
-        Meteor.call("joinGame");
-      }).toThrow();
-    });
-
     it("requires a Meteor user id", function() {
       spyOn(Meteor, "userId").and.returnValue(undefined);
 
       expect(function() {
         Meteor.call("joinGame", GAME_ID);
-      }).toThrow();
-    });
-
-    it("requires a valid gameId", function() {
-      spyOn(Meteor, "userId").and.returnValue(USER_ID);
-
-      expect(function() {
-        Meteor.call("joinGame", "not a valid gameId");
       }).toThrow();
     });
 

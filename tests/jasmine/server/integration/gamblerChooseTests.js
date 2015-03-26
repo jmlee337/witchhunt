@@ -15,12 +15,6 @@ Jasmine.onTest(function() {
       Players.remove({});
       Roles.remove({});
       WakeAcks.remove({});
-    })
-
-    it("requires a gameId", function() {
-      expect(function() {
-        Meteor.call("gamblerChoose");
-      }).toThrow();
     });
 
     it("requires game to be in setup", function() {
@@ -31,23 +25,9 @@ Jasmine.onTest(function() {
       }).toThrow();
     });
 
-    it("requires player to be in the game", function() {
-      Players.update({}, {$set: {gameId: "not the right gameId"}});
-
-      expect(function() {
-        Meteor.call("gamblerChoose", GAME_ID);
-      }).toThrow();
-    });
-
     it("requires player to be the gambler", function() {
       Roles.update({}, {$set: {role: "not gambler"}});
 
-      expect(function() {
-        Meteor.call("gamblerChoose", GAME_ID);
-      }).toThrow();
-    });
-
-    it("requires an odd", function() {
       expect(function() {
         Meteor.call("gamblerChoose", GAME_ID);
       }).toThrow();
