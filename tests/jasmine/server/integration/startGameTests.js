@@ -163,150 +163,114 @@ Jasmine.onTest(function() {
       Roles.remove({});
     });
 
-    it("requires a gameId", function(done) {
-      Meteor.call("startGame", function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+    it("requires a gameId", function() {
+      expect(function() {
+        Meteor.call("startGame");
+      }).toThrow();
     });
 
-    it("requires game to be in lobby", function(done) {
+    it("requires game to be in lobby", function() {
       Games.update({}, {$set: {view: "not lobby"}});
-
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      
+      expect(function() {
+        Meteor.call("startGame", GAME_ID);
+      }).toThrow();
     });
 
-    it("requires player to be in the game", function(done) {
+    it("requires player to be in the game", function() {
       Players.update({}, {$set: {gameId: "not the right gameId"}});
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("startGame", GAME_ID);
+      }).toThrow();
     });
 
-    it("requires player to be owner of the game", function(done) {
+    it("requires player to be owner of the game", function() {
       Games.update({}, {$set: {userId: "not the right userId"}});
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("startGame", GAME_ID);
+      }).toThrow();
     });
 
-    it("requires at least 7 players", function(done) {
+    it("requires at least 7 players", function() {
       addPlayers(5); // 6 total
-
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      
+      expect(function() {
+        Meteor.call("startGame", GAME_ID);
+      }).toThrow();
     });
 
-    it("requires at most 12 players", function(done) {
+    it("requires at most 12 players", function() {
       addPlayers(12); // 13 total
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("startGame", GAME_ID);
+      }).toThrow();
     });
 
-    it("inserts NO_KILL player", function(done) {
+    it("inserts NO_KILL player", function() {
       addPlayers(6); // 7 total
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
-        expect(Players.findOne({gameId: GAME_ID, userId: NO_KILL_ID, name: NO_KILL_STRING})).toBeTruthy();
-        done();
-      });
+      Meteor.call("startGame", GAME_ID);
+
+      expect(Players.findOne({gameId: GAME_ID, userId: NO_KILL_ID, name: NO_KILL_STRING})).toBeTruthy();
     });
 
-    it("moves game to setup", function(done) {
+    it("moves game to setup", function() {
       addPlayers(6); // 7 total
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
-        expect(Games.findOne().view).toBe("setup");
-        done();
-      });
+      Meteor.call("startGame", GAME_ID);
+
+      expect(Games.findOne().view).toBe("setup");
     });
 
-    it("gives correct roles for 7 players", function(done) {
+    it("gives correct roles for 7 players", function() {
       addPlayers(6) // 7 total
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("startGame", GAME_ID);
 
-        verifyRoles(7);
-        done();
-      });
+      verifyRoles(7);
     });
 
-    it("gives correct roles for 8 players", function(done) {
+    it("gives correct roles for 8 players", function() {
       addPlayers(7) // 8 total
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("startGame", GAME_ID);
 
-        verifyRoles(8);
-        done();
-      });
+      verifyRoles(8);
     });
 
-    it("gives correct roles for 9 players", function(done) {
+    it("gives correct roles for 9 players", function() {
       addPlayers(8) // 9 total
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("startGame", GAME_ID);
 
-        verifyRoles(9);
-        done();
-      });
+      verifyRoles(9);
     });
 
-    it("gives correct roles for 10 players", function(done) {
+    it("gives correct roles for 10 players", function() {
       addPlayers(9) // 10 total
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("startGame", GAME_ID);
 
-        verifyRoles(10);
-        done();
-      });
+      verifyRoles(10);
     });
 
-    it("gives correct roles for 11 players", function(done) {
+    it("gives correct roles for 11 players", function() {
       addPlayers(10) // 11 total
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("startGame", GAME_ID); 
 
-        verifyRoles(11);
-        done();
-      });
+      verifyRoles(11);
     });
 
-    it("gives correct roles for 12 players", function(done) {
+    it("gives correct roles for 12 players", function() {
       addPlayers(11) // 12 total
 
-      Meteor.call("startGame", GAME_ID, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("startGame", GAME_ID);
 
-        verifyRoles(12);
-        done();
-      });
+      verifyRoles(12);
     });
   });
 });

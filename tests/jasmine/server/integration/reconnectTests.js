@@ -11,45 +11,33 @@ Jasmine.onTest(function() {
       Players.remove({});
     })
 
-    it("requires a Meteor user id", function(done) {
+    it("requires a Meteor user id", function() {
       spyOn(Meteor, "userId").and.returnValue(undefined);
 
-      Meteor.call("reconnect", function(error, result) {
-        expect(error).toBeDefined();
-        expect(result).toBeUndefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("reconnect");
+      }).toThrow();
     });
 
-    it("requires a valid Meteor user id", function(done) {
+    it("requires a valid Meteor user id", function() {
       spyOn(Meteor, "userId").and.returnValue("the-wrong-user-id");
 
-      Meteor.call("reconnect", function(error, result) {
-        expect(error).toBeDefined();
-        expect(result).toBeUndefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("reconnect");
+      }).toThrow();
     });
 
-    it("returns the gameId for the player", function(done) {
+    it("returns the gameId for the player", function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
 
-      Meteor.call("reconnect", function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBe(GAME_ID);
-        done();
-      });
+      expect(Meteor.call("reconnect")).toBe(GAME_ID);
     });
 
-    it("returns the gameId for the most recent player", function(done) {
+    it("returns the gameId for the most recent player", function() {
       Players.insert({gameId: "the wrong game id", userId: USER_ID, createdMs: 500});
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
 
-      Meteor.call("reconnect", function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBe(GAME_ID);
-        done();
-      });
+      expect(Meteor.call("reconnect")).toBe(GAME_ID);
     });
   });
 });

@@ -17,143 +17,117 @@ Jasmine.onTest(function() {
       WakeAcks.remove({});
     })
 
-    it("requires a gameId", function(done) {
-      Meteor.call("apprenticeChoose", function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+    it("requires a gameId", function() {
+      expect(function() {
+        Meteor.call("apprenticeChoose");
+      }).toThrow();
     });
 
-    it("requires game to be in setup", function(done) {
+    it("requires game to be in setup", function() {
       Games.update({}, {$set: {view: "not setup"}});
 
-      Meteor.call("apprenticeChoose", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("apprenticeChoose", GAME_ID);
+      }).toThrow();
     });
 
-    it("requires player to be in the game", function(done) {
+    it("requires player to be in the game", function() {
       Players.update({}, {$set: {gameId: "not the right gameId"}});
 
-      Meteor.call("apprenticeChoose", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("apprenticeChoose", GAME_ID);
+      }).toThrow();
     });
 
-    it("requires player to be the apprentice", function(done) {
+    it("requires player to be the apprentice", function() {
       Roles.update({}, {$set: {role: "not apprentice"}});
 
-      Meteor.call("apprenticeChoose", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("apprenticeChoose", GAME_ID);
+      }).toThrow();
     });
 
-    it("requires a master", function(done) {
-      Meteor.call("apprenticeChoose", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+    it("requires a master", function() {
+      expect(function() {
+        Meteor.call("apprenticeChoose", GAME_ID);
+      }).toThrow();
     });
 
-    it("requires master to be a valid value", function(done) {
-      Meteor.call("apprenticeChoose", GAME_ID, "not judge or gravedigger", function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+    it("requires master to be a valid value", function() {
+      expect(function() {
+        Meteor.call("apprenticeChoose", GAME_ID, "not judge or gravedigger");
+      }).toThrow();
     });
 
-    it("chooses judge correctly", function(done) {
+    it("chooses judge correctly", function() {
       var judgeId = "judge-user-id";
       var judgeName = "judge-name";
       Players.insert({gameId: GAME_ID, userId: judgeId, name: judgeName});
       Roles.insert({gameId: GAME_ID, userId: judgeId, role: "judge"});
 
-      Meteor.call("apprenticeChoose", GAME_ID, "judge", function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("apprenticeChoose", GAME_ID, "judge");
 
-        expect(Roles.findOne({gameId: GAME_ID, userId: USER_ID, role: "apprentice"}).secrets).toEqual({
-          master: {
-            id: judgeId,
-            name: judgeName,
-            role: "judge"
-          }
-        });
-        done();
+      expect(Roles.findOne({gameId: GAME_ID, userId: USER_ID, role: "apprentice"}).secrets).toEqual({
+        master: {
+          id: judgeId,
+          name: judgeName,
+          role: "judge"
+        }
       });
     });
 
-    it("chooses gravedigger correctly", function(done) {
+    it("chooses gravedigger correctly", function() {
       var gravediggerId = "gravedigger-user-id";
       var gravediggerName = "gravedigger-name";
       Players.insert({gameId: GAME_ID, userId: gravediggerId, name: gravediggerName});
       Roles.insert({gameId: GAME_ID, userId: gravediggerId, role: "gravedigger"});
 
-      Meteor.call("apprenticeChoose", GAME_ID, "gravedigger", function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("apprenticeChoose", GAME_ID, "gravedigger");
 
-        expect(Roles.findOne({gameId: GAME_ID, userId: USER_ID, role: "apprentice"}).secrets).toEqual({
-          master: {
-            id: gravediggerId,
-            name: gravediggerName,
-            role: "gravedigger"
-          }
-        });
-        done();
+      expect(Roles.findOne({gameId: GAME_ID, userId: USER_ID, role: "apprentice"}).secrets).toEqual({
+        master: {
+          id: gravediggerId,
+          name: gravediggerName,
+          role: "gravedigger"
+        }
       });
     });
 
-    it("moves game to confirmWake if all acks are done", function(done) {
+    it("moves game to confirmWake if all acks are done", function() {
       var judgeId = "judge-user-id";
       Players.insert({gameId: GAME_ID, userId: judgeId, name: "judge-name"});
       Roles.insert({gameId: GAME_ID, userId: judgeId, role: "judge"});
 
-      Meteor.call("apprenticeChoose", GAME_ID, "judge", function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("apprenticeChoose", GAME_ID, "judge");
 
-        expect(Games.findOne(GAME_ID).view).toBe("confirmWake");
-        expect(WakeAcks.find({gameId: GAME_ID}).count()).toBe(0);
-        done();
-      });
+      expect(Games.findOne(GAME_ID).view).toBe("confirmWake");
+      expect(WakeAcks.find({gameId: GAME_ID}).count()).toBe(0);
     });
 
-    it("doesn't move game if more acks are needed", function(done) {
+    it("doesn't move game if more acks are needed", function() {
       var judgeId = "judge-user-id";
       Players.insert({gameId: GAME_ID, userId: judgeId, name: "judge-name"});
       Roles.insert({gameId: GAME_ID, userId: judgeId, role: "judge"});
 
       Players.insert({gameId: GAME_ID, userId: "other-user-id", alive: true});
 
-      Meteor.call("apprenticeChoose", GAME_ID, "judge", function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("apprenticeChoose", GAME_ID, "judge");
 
-        expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
-        expect(Games.findOne(GAME_ID).view).toBe("setup");
-        done();
-      });
+      expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
+      expect(Games.findOne(GAME_ID).view).toBe("setup");
     });
 
-    it("doesn't count NO_KILL as needing to ack", function(done) {
+    it("doesn't count NO_KILL as needing to ack", function() {
       var judgeId = "judge-user-id";
       Players.insert({gameId: GAME_ID, userId: judgeId, name: "judge-name"});
       Roles.insert({gameId: GAME_ID, userId: judgeId, role: "judge"});
 
       Players.insert({gameId: GAME_ID, userId: NO_KILL_ID, alive: true});
 
-      Meteor.call("apprenticeChoose", GAME_ID, "judge", function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("apprenticeChoose", GAME_ID, "judge");
 
-        expect(Games.findOne(GAME_ID).view).toBe("confirmWake");
-        expect(WakeAcks.find({gameId: GAME_ID}).count()).toBe(0);
-        done();
-      });
+      expect(Games.findOne(GAME_ID).view).toBe("confirmWake");
+      expect(WakeAcks.find({gameId: GAME_ID}).count()).toBe(0);
     });
   });
 });

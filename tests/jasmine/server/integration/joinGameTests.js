@@ -14,79 +14,67 @@ Jasmine.onTest(function() {
       Players.remove({});
     });
 
-    it("requires a gameId", function(done) {
-      Meteor.call("joinGame", function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+    it("requires a gameId", function() {
+      expect(function() {
+        Meteor.call("joinGame");
+      }).toThrow();
     });
 
-    it("requires a Meteor user id", function(done) {
+    it("requires a Meteor user id", function() {
       spyOn(Meteor, "userId").and.returnValue(undefined);
 
-      Meteor.call("joinGame", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      })
+      expect(function() {
+        Meteor.call("joinGame", GAME_ID);
+      }).toThrow();
     });
 
-    it("requires a valid gameId", function(done) {
+    it("requires a valid gameId", function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
 
-      Meteor.call("joinGame", "not a valid gameId", function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("joinGame", "not a valid gameId");
+      }).toThrow();
     });
 
-    it("requires name to add player", function(done) {
+    it("requires name to add player", function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
 
-      Meteor.call("joinGame", GAME_ID, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("joinGame", GAME_ID);
+      }).toThrow();
     });
 
-    it("requires game to be in lobby to add player", function(done) {
+    it("requires game to be in lobby to add player", function() {
       Games.update({}, {$set: {view: "not lobby"}});
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
 
-      Meteor.call("joinGame", GAME_ID, NAME, function(error, result) {
-        expect(error).toBeDefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("joinGame", GAME_ID, NAME);
+      }).toThrow();
     });
 
-    it("adds player", function(done) {
+    it("adds player", function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
       jasmine.clock().install();
       jasmine.clock().mockDate(new Date(NOW_MS));
 
-      Meteor.call("joinGame", GAME_ID, NAME, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
+      Meteor.call("joinGame", GAME_ID, NAME);
 
-        expect(Players.findOne()).toEqual(jasmine.objectContaining({
-          gameId: GAME_ID, userId: USER_ID, name: NAME, alive: true, votes: 0, createdMs: NOW_MS
-        }));
+      expect(Players.findOne()).toEqual(jasmine.objectContaining({
+        gameId: GAME_ID, userId: USER_ID, name: NAME, alive: true, votes: 0, createdMs: NOW_MS
+      }));
 
-        jasmine.clock().uninstall();
-        done();
-      });
+      jasmine.clock().uninstall();
     });
 
-    it("reconnects if player already exists", function(done) {
+    it("reconnects if player already exists", function() {
       Players.insert({gameId: GAME_ID, userId: USER_ID});
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
       spyOn(Players, "insert");
 
-      Meteor.call("joinGame", GAME_ID, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBeUndefined();
-        expect(Players.insert.calls.any()).toBe(false);
-        done();
-      });
+      Meteor.call("joinGame", GAME_ID);
+      
+      expect(Players.insert.calls.any()).toBe(false);
     });
   });
 });

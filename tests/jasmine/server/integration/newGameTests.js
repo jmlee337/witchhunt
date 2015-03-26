@@ -10,62 +10,48 @@ Jasmine.onTest(function() {
       Players.remove({});
     });
 
-    it("requires a name", function(done) {
-      Meteor.call("newGame", function(error, result) {
-        expect(error).toBeDefined();
-        expect(result).toBeUndefined();
-        done();
-      });
+    it("requires a name", function() {
+      expect(function() {
+        Meteor.call("newGame");
+      }).toThrow();
     });
 
-    it("requires a Meteor user id", function(done) {
+    it("requires a Meteor user id", function() {
       spyOn(Meteor, "userId").and.returnValue(undefined);
 
-      Meteor.call("newGame", NAME, function(error, result) {
-        expect(error).toBeDefined();
-        expect(result).toBeUndefined();
-        done();
-      });
+      expect(function() {
+        Meteor.call("newGame", NAME);
+      }).toThrow();
     });
 
-    it("inserts a new Game", function(done) {
+    it("inserts a new Game", function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
       spyOn(global, "xkcd_pw_gen").and.returnValue(GAME_ID);
 
-      Meteor.call("newGame", NAME, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(Games.findOne()).toEqual({_id: GAME_ID, userId: USER_ID, view: "lobby"});
-        done();
-      });
+      Meteor.call("newGame", NAME);
+      expect(Games.findOne()).toEqual({_id: GAME_ID, userId: USER_ID, view: "lobby"});
     });
 
-    it("inserts a new Player", function(done) {
+    it("inserts a new Player", function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
       spyOn(global, "xkcd_pw_gen").and.returnValue(GAME_ID);
       jasmine.clock().install();
       jasmine.clock().mockDate(new Date(NOW_MS));
 
-      Meteor.call("newGame", NAME, function(error, result) {
-        expect(error).toBeUndefined();
+      Meteor.call("newGame", NAME);
 
-        expect(Players.findOne()).toEqual(jasmine.objectContaining({
-          gameId: GAME_ID, userId: USER_ID, name: NAME, alive: true, votes: 0, createdMs: NOW_MS
-        }));
+      expect(Players.findOne()).toEqual(jasmine.objectContaining({
+        gameId: GAME_ID, userId: USER_ID, name: NAME, alive: true, votes: 0, createdMs: NOW_MS
+      }));
 
-        jasmine.clock().uninstall();
-        done();
-      });
+      jasmine.clock().uninstall();
     });
 
-    it("returns a gameId", function(done) {
+    it("returns a gameId", function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
       spyOn(global, "xkcd_pw_gen").and.returnValue(GAME_ID);
 
-      Meteor.call("newGame", NAME, function(error, result) {
-        expect(error).toBeUndefined();
-        expect(result).toBe(GAME_ID);
-        done();
-      });
+      expect(Meteor.call("newGame", NAME)).toBe(GAME_ID);
     });
   });
 });
