@@ -15,20 +15,12 @@ Jasmine.onTest(function() {
       WakeAcks.remove({});
     });
 
-    it("requires game to be in setup", function() {
-      Games.update({}, {$set: {view: "not setup"}});
-
-      expect(function() {
-        Meteor.call("setupAck", GAME_ID);
-      }).toThrow();
-    });
-
     it("requires player to not have already successfully called sleepAck", function() {
       WakeAcks.insert({gameId: GAME_ID, userId: USER_ID});
 
       expect(function() {
         Meteor.call("setupAck", GAME_ID);
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
     });
 
     it("moves game to confirmWake if all acks are done", function() {

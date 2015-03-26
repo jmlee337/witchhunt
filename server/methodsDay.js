@@ -1,11 +1,12 @@
 Meteor.methods({
   dayVote: function(gameId, userId) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkGameState(gameId, "day");
     checkUserGame(gameId);
     checkUserLive(gameId);
     check(userId, String);
-    if (!Roles.findOne({userId: Meteor.userId(), gameId: gameId, lives: {$gt: 0}})) {
+    if (!Players.findOne({userId: Meteor.userId(), gameId: gameId, alive: true})) {
       throw new Meteor.Error("authorization", "not authorized to dayVote");
     }
 
@@ -22,6 +23,7 @@ Meteor.methods({
 
   preNightAck: function(gameId) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkGameState(gameId, "preNight");
     checkUserGame(gameId);
 
@@ -37,6 +39,7 @@ Meteor.methods({
 
   confirmSleepAck: function(gameId) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkGameState(gameId, "confirmSleep");
     checkUserGame(gameId);
     var game = Games.findOne(gameId);
@@ -109,6 +112,7 @@ Meteor.methods({
 
   preDayAck: function(gameId) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkGameState(gameId, "preDay");
     checkUserGame(gameId);
 
@@ -124,6 +128,7 @@ Meteor.methods({
 
   confirmWakeAck: function(gameId) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkGameState(gameId, "confirmWake");
     checkUserGame(gameId);
 
@@ -157,6 +162,7 @@ Meteor.methods({
 
   judgeSmite: function(gameId, userId) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkGameState(gameId, "judge");
     checkUserGame(gameId);
     checkUserLive(gameId);
@@ -171,6 +177,7 @@ Meteor.methods({
 
   deathRattle: function(gameId, targetId) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkUserGame(gameId);
     var userId = Meteor.userId();
     var role = Roles.findOne({userId: userId, gameId: gameId});
@@ -239,7 +246,7 @@ dayAck = function(gameId, excludeKilled) {
   var userId = Meteor.userId();
   var player = Players.findOne({userId: userId, gameId: gameId});
   if (!player.alive) {
-    if (excludeKilled || !DayKills.findOne({userId: player.userId})) {
+    if (excludeKilled || !DayKills.findOne({userId: player.userId, gameId: gameId, died: true})) {
       throw new Meteor.Error("authorization", "this user is not allowed to ack");
     }
   }

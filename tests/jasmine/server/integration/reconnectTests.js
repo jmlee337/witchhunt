@@ -16,7 +16,7 @@ Jasmine.onTest(function() {
 
       expect(function() {
         Meteor.call("reconnect");
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
     });
 
     it("requires a valid Meteor user id", function() {
@@ -24,7 +24,7 @@ Jasmine.onTest(function() {
 
       expect(function() {
         Meteor.call("reconnect");
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
     });
 
     it("returns the gameId for the player", function() {

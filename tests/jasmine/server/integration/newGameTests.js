@@ -15,7 +15,7 @@ Jasmine.onTest(function() {
 
       expect(function() {
         Meteor.call("newGame", NAME);
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
     });
 
     it("inserts a new Game", function() {

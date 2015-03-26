@@ -49,6 +49,7 @@ Meteor.methods({
 
   startGame: function(gameId) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkGameState(gameId, "lobby");
     checkUserGame(gameId);
     if (Games.findOne(gameId).userId !== Meteor.userId()) {
@@ -106,6 +107,7 @@ Meteor.methods({
 
   setupAck: function(gameId) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkGameState(gameId, "setup");
     checkUserGame(gameId);
 
@@ -114,6 +116,7 @@ Meteor.methods({
 
   apprenticeChoose: function(gameId, master) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkGameState(gameId, "setup");
     checkUserGame(gameId);
     checkUserRole(gameId, "apprentice");
@@ -131,6 +134,7 @@ Meteor.methods({
 
   gamblerChoose: function(gameId, odd) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkGameState(gameId, "setup");
     checkUserGame(gameId);
     checkUserRole(gameId, "gambler");

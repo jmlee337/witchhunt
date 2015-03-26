@@ -1,6 +1,8 @@
 Meteor.methods({
   clearVote: function(gameId) {
     check(gameId, String);
+    checkGameExists(gameId);
+    checkUserGame(gameId);
     var unauthorized = false;
     switch (Games.findOne(gameId).view) {
       case "day":
@@ -34,10 +36,11 @@ Meteor.methods({
       throw new Meteor.Error("authorization", "not authorized to clearVote");
     }
 
-    var oldVote = Votes.findOne({userId:Meteor.userId(), gameId: gameId});
+    var userId = Meteor.userId();
+    var oldVote = Votes.findOne({userId: userId, gameId: gameId});
     if (oldVote) {
       Players.update({userId: oldVote.voteId, gameId: gameId}, {$inc: {votes: -1}});
+      Votes.remove({userId:userId, gameId: gameId});
     }
-    Votes.remove({userId:Meteor.userId(), gameId: gameId});
   }
 });

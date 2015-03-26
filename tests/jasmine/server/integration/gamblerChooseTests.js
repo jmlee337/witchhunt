@@ -17,22 +17,6 @@ Jasmine.onTest(function() {
       WakeAcks.remove({});
     });
 
-    it("requires game to be in setup", function() {
-      Games.update({}, {$set: {view: "not setup"}});
-
-      expect(function() {
-        Meteor.call("gamblerChoose", GAME_ID);
-      }).toThrow();
-    });
-
-    it("requires player to be the gambler", function() {
-      Roles.update({}, {$set: {role: "not gambler"}});
-
-      expect(function() {
-        Meteor.call("gamblerChoose", GAME_ID);
-      }).toThrow();
-    });
-
     it("chooses odd correctly", function() {
       Meteor.call("gamblerChoose", GAME_ID, true);
 

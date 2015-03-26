@@ -19,7 +19,7 @@ Jasmine.onTest(function() {
 
       expect(function() {
         Meteor.call("joinGame", GAME_ID);
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
     });
 
     it("requires name to add player", function() {
@@ -27,7 +27,7 @@ Jasmine.onTest(function() {
 
       expect(function() {
         Meteor.call("joinGame", GAME_ID);
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Match.Error"}));
     });
 
     it("requires game to be in lobby to add player", function() {
@@ -36,7 +36,7 @@ Jasmine.onTest(function() {
 
       expect(function() {
         Meteor.call("joinGame", GAME_ID, NAME);
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
     });
 
     it("adds player", function() {

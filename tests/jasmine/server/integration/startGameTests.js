@@ -163,16 +163,6 @@ Jasmine.onTest(function() {
       Roles.remove({});
     });
 
-    it("requires game to be in lobby", function() {
-      addPlayers(6); // 7 total
-
-      Games.update({}, {$set: {view: "not lobby"}});
-      
-      expect(function() {
-        Meteor.call("startGame", GAME_ID);
-      }).toThrow();
-    });
-
     it("requires player to be owner of the game", function() {
       addPlayers(6); // 7 total
 
@@ -180,7 +170,12 @@ Jasmine.onTest(function() {
 
       expect(function() {
         Meteor.call("startGame", GAME_ID);
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
+
+      Games.update({}, {$set: {userId: USER_ID}});
+      expect(function() {
+        Meteor.call("startGame", GAME_ID);
+      }).not.toThrow();
     });
 
     it("requires at least 7 players", function() {
@@ -188,7 +183,7 @@ Jasmine.onTest(function() {
       
       expect(function() {
         Meteor.call("startGame", GAME_ID);
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
     });
 
     it("requires at most 12 players", function() {
@@ -196,7 +191,7 @@ Jasmine.onTest(function() {
 
       expect(function() {
         Meteor.call("startGame", GAME_ID);
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
     });
 
     it("inserts NO_KILL player", function() {

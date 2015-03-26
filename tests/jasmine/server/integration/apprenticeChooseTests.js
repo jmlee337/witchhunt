@@ -17,38 +17,14 @@ Jasmine.onTest(function() {
       WakeAcks.remove({});
     });
 
-    it("requires game to be in setup", function() {
-      var judgeId = "judge-user-id";
-      Players.insert({gameId: GAME_ID, userId: judgeId, name: "judge-name"});
-      Roles.insert({gameId: GAME_ID, userId: judgeId, role: "judge"});
-
-      Games.update({}, {$set: {view: "not setup"}});
-
-      expect(function() {
-        Meteor.call("apprenticeChoose", GAME_ID, "judge");
-      }).toThrow();
-    });
-
-    it("requires player to be the apprentice", function() {
-      var judgeId = "judge-user-id";
-      Players.insert({gameId: GAME_ID, userId: judgeId, name: "judge-name"});
-      Roles.insert({gameId: GAME_ID, userId: judgeId, role: "judge"});
-
-      Roles.update({}, {$set: {role: "not apprentice"}});
-
-      expect(function() {
-        Meteor.call("apprenticeChoose", GAME_ID, "judge");
-      }).toThrow();
-    });
-
-    it("requires master to be a valid value", function() {
+    it("checks master for validity", function() {
       var judgeId = "judge-user-id";
       Players.insert({gameId: GAME_ID, userId: judgeId, name: "judge-name"});
       Roles.insert({gameId: GAME_ID, userId: judgeId, role: "judge"});
 
       expect(function() {
         Meteor.call("apprenticeChoose", GAME_ID, "not judge or gravedigger");
-      }).toThrow();
+      }).toThrow(jasmine.objectContaining({errorType: "Match.Error"}));
     });
 
     it("chooses judge correctly", function() {
