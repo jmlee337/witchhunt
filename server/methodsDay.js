@@ -72,8 +72,8 @@ Meteor.methods({
               graveSecrets.killedToday++;
             }
           });
-          Roles.update({userId: gravedigger.userId, gameId: gameId}, {$set: {secrets: graveSecrets}});
         }
+        Roles.update({userId: gravedigger.userId, gameId: gameId}, {$set: {secrets: graveSecrets}});
       }
 
       // Give gambler protection

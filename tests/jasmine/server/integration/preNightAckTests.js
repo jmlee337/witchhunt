@@ -37,6 +37,13 @@ Jasmine.onTest(function() {
         Meteor.call("preNightAck", GAME_ID);
       }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
     });
+    
+    it("moves game if no more acks are needed", function() {
+      Meteor.call("preNightAck", GAME_ID);
+
+      expect(Games.findOne(GAME_ID).view).not.toBe("preNight");
+      expect(DayAcks.find({gameId: GAME_ID}).count()).toBe(0);
+    });
 
     it("doesn't move game if more acks are needed", function() {
       Players.insert({gameId: GAME_ID, userId: "other-id", alive: true});
