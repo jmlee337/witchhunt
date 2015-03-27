@@ -179,6 +179,7 @@ Meteor.methods({
     check(gameId, String);
     checkGameExists(gameId);
     checkUserGame(gameId);
+    checkTarget(gameId, targetId);
     var userId = Meteor.userId();
     var role = Roles.findOne({userId: userId, gameId: gameId});
     if (!role || !(role.role === "bod" || role.role === "dob")) {
@@ -198,9 +199,6 @@ Meteor.methods({
     if (targetId === NO_KILL_ID) {
       throw new Meteor.Error("argument", "deathrattle cannot target no one");
     }
-    if (!Players.findOne({userId: targetId, gameId: gameId, alive: true})) {
-      throw new Meteor.Error("argument", "player with specified id is not a valid target");
-    }
 
     Roles.update({userId: userId, gameId: gameId}, {$set: {secrets: {used: true}}});
     if (state === "preNight") {
@@ -211,10 +209,8 @@ Meteor.methods({
       var cod = role.role;
       if (cod === "bod") {
         Roles.update({userId: targetId, gameId: gameId}, {$inc: {lives: 1}});
-      } else if (cod === "dob") {
+      } else { // dob
         Roles.update({userId: targetId, gameId: gameId}, {$inc: {lives: -1}});
-      } else {
-        throw new Meteor.Error("argument", "invalid cod");
       }
       var victimRole = Roles.findOne({userId: targetId, gameId: gameId});
       if (victimRole.lives < 1) {

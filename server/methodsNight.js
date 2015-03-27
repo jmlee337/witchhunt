@@ -1,9 +1,14 @@
 Meteor.methods({
   nightAck: function(gameId) {
     check(gameId, String);
+    checkGameExists(gameId);
     checkUserGame(gameId);
-    checkGameState(gameId, Roles.findOne({userId: Meteor.userId(), gameId: gameId}).role);
     checkUserLive(gameId);
+    var view = Games.findOne(gameId).view;
+    if (!(view === "gravedigger" || view === "priest")) {
+      throw new Meteor.Error("state", "nightAck cannot be called at this time");
+    }
+    checkUserRole(gameId, view);
 
     clearViewTimeout(gameId, Games.findOne(gameId).view);
     goToNextRole(gameId);

@@ -2,9 +2,9 @@
  * External (public)
  */
 clearViewTimeout = function(gameId, view) {
-  var timeoutId = Timeouts.findOne({gameId: gameId, view: view});
-  if (timeoutId) {
-    Meteor.clearTimeout(timeoutId);
+  var timeout = Timeouts.findOne({gameId: gameId, view: view});
+  if (timeout) {
+    Meteor.clearTimeout(timeout.id);
   }
 };
 
