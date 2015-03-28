@@ -350,12 +350,10 @@ Template.preDay.helpers({
       return ["No one died."];
     }
     var arr = [];
-    var holies = [];
+    var deadPriestId;
     var oracle = Roles.findOne({userId: Meteor.userId(), role: "oracle"});
-    if (oracle) {
-      for (var i = 0; i < oracle.secrets.holies.length; i++) {
-        holies.push(oracle.secrets.holies[i].id);
-      }
+    if (oracle && oracle.secrets.deadPriest) {
+      deadPriestId = oracle.secrets.deadPriest.id;
     }
     nightKills.forEach(function(victim) {
       var desc = victim.name;
@@ -374,10 +372,8 @@ Template.preDay.helpers({
       } else {
         desc += ", but did not die.";
       }
-      if (holies) {
-        if (holies.indexOf(victim.userId) >= 0) {
-          desc += " (Holy)";
-        }
+      if (victim.userId === deadPriestId) {
+        desc += " (Priest)";
       }
       arr.push(desc);
     });
@@ -609,12 +605,8 @@ secretsDesc = function(secrets) {
   if (secrets.tonightWeHunt) {
     return "You may kill a player tonight";
   }
-  if (secrets.holies && secrets.holies.length > 0) {
-    var desc = secrets.holies[0].name + " was a member of the Village Clergy.";
-    for (var i = 1; i < secrets.holies.length; i++) {
-      desc += "<br/>" + secrets.holies[i].name + " was a member of the Village Clergy.";
-    }
-    return desc;
+  if (secrets.deadPriest) {
+    return secrets.deadPriest.name + " was a member of the Village Clergy.";
   }
   if (secrets.priest) {
     return secrets.priest.name + " is the Priest.";

@@ -59,13 +59,13 @@ maybeGoToRole = function(gameId, roleName) {
     // oracle still gets info when dead
     var oracle = Roles.findOne({gameId: gameId, role: "oracle"});
     if (oracle && killed.count() > 0) {
-      var secrets = oracle.secrets;
       killed.forEach(function(player) {
-        if (Roles.findOne({userId: player.userId, gameId: gameId, alignment: "holy"})) {
-          secrets.holies.push({id: player.userId, name: player.name});
+        if (Roles.findOne({userId: player.userId, gameId: gameId, role: "priest"})) {
+          Roles.update(
+              {userId: oracle.userId, gameId: gameId},
+              {$set: {secrets: {deadPriest: {id: player.userId, name: player.name}}}});
         }
       });
-      Roles.update({userId: oracle.userId, gameId: gameId}, {$set: {secrets: secrets}});
     }
 
     Games.update(gameId, {$set: {view: "preDay"}});

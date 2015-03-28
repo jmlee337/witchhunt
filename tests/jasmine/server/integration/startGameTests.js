@@ -57,7 +57,7 @@ Jasmine.onTest(function() {
           expect(oracle.userId).toBeDefined();
           expect(Players.findOne({gameId: GAME_ID, userId: oracle.userId})).toBeTruthy();
           userIdSet.add(oracle.userId);
-          expect(oracle.secrets).toEqual({holies: []});
+          expect(oracle.secrets).toEqual({});
           alignCounts[oracle.alignment]++;
         case 7:
           var priest = Roles.findOne({gameId: GAME_ID, role: "priest", lives: 1, alignment: "holy"});

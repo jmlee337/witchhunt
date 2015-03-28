@@ -73,11 +73,6 @@ Meteor.methods({
       Roles.update({gameId: gameId, role: "priest"}, {$set: {secrets: {investigations: []}}});
     }
 
-    // setup oracle
-    if (Roles.findOne({gameId: gameId, role: "oracle"})) {
-      Roles.update({gameId: gameId, role: "oracle"}, {$set: {secrets: {holies: []}}});
-    }
-
     // setup acolyte
     if (Roles.findOne({gameId: gameId, role: "acolyte"})) {
       var priestRole = Roles.findOne({gameId: gameId, role: "priest"});
