@@ -60,7 +60,7 @@ Jasmine.onTest(function() {
       var TIMEOUT_ID = 1000;
       spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
       Players.insert({gameId: GAME_ID, userId: NO_KILL_ID, votes: 1, alive: true}); // two real live players total
-      Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "judge"});
+      Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "judge", lives: 1});
 
       Meteor.call("dayVote", GAME_ID, NO_KILL_ID);
 
@@ -71,9 +71,8 @@ Jasmine.onTest(function() {
     it("moves game to judge if vote is deciding, no kill, and judge is dead", function() {
       spyOn(Meteor, "setTimeout");
       var deadId = "dead-id";
-      Roles.insert({gameId: GAME_ID, userId: deadId, role: "judge", lives: 0});
-      Players.insert({gameId: GAME_ID, userId: deadId, alive: false});
       Players.insert({gameId: GAME_ID, userId: NO_KILL_ID, votes: 1, alive: true}); // two real live players total
+      Roles.insert({gameId: GAME_ID, userId: deadId, role: "judge", lives: 0});
 
       Meteor.call("dayVote", GAME_ID, NO_KILL_ID);
 

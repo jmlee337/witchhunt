@@ -49,7 +49,6 @@ checkUserTown = function(gameId) {
 };
 
 checkTarget = function(gameId, userId) {
-  // This check must reference Players and not Roles to keep secrets during night
   var player = Players.findOne({userId: userId, gameId: gameId, alive: true});
   if (!player) {
     throw new Meteor.Error("argument", "can only be called for a valid target");

@@ -124,7 +124,6 @@ Jasmine.onTest(function() {
 
     it("moves to real hunter if hunter can hunt and is alive", function() {
       var hunterId = "hunter-id";
-      Players.insert({gameId: GAME_ID, userId: hunterId, alive: true});
       Roles.insert({
           gameId: GAME_ID, userId: hunterId, role: "hunter", lives: 1, secrets: {tonightWeHunt: true}
       });
@@ -137,7 +136,6 @@ Jasmine.onTest(function() {
 
     it("moves to fake hunter if hunter can hunt and is dead", function() {
       var hunterId = "hunter-id";
-      Players.insert({gameId: GAME_ID, userId: hunterId, alive: false});
       Roles.insert({
           gameId: GAME_ID, userId: hunterId, role: "hunter", lives: 0, secrets: {tonightWeHunt: true}
       });

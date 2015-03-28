@@ -6,9 +6,6 @@ Meteor.methods({
     checkUserGame(gameId);
     checkUserLive(gameId);
     check(userId, String);
-    if (!Players.findOne({userId: Meteor.userId(), gameId: gameId, alive: true})) {
-      throw new Meteor.Error("authorization", "not authorized to dayVote");
-    }
 
     if (vote(gameId, userId, numLivePlayers(gameId))) {
       clearViewTimeout(gameId, "day");

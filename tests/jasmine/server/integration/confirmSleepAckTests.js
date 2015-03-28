@@ -324,9 +324,7 @@ Jasmine.onTest(function() {
     
     it("moves to real gravedigger if alive", function() {
       var graveId = "grave-id";
-      DayAcks.insert({gameId: GAME_ID, userId: graveId});
-      Players.insert({gameId: GAME_ID, userId: graveId, alive: true});
-      Roles.insert({gameId: GAME_ID, userId: graveId, role: "gravedigger"});
+      Roles.insert({gameId: GAME_ID, userId: graveId, role: "gravedigger", lives: 1, secrets: {}});
       
       Meteor.call("confirmSleepAck", GAME_ID);
       
@@ -336,8 +334,7 @@ Jasmine.onTest(function() {
     
     it("moves to fake gravedigger if dead", function() {
       var graveId = "grave-id";
-      Players.insert({gameId: GAME_ID, userId: graveId, alive: false});
-      Roles.insert({gameId: GAME_ID, userId: graveId, role: "gravedigger"});
+      Roles.insert({gameId: GAME_ID, userId: graveId, role: "gravedigger", lives: 0});
       
       Meteor.call("confirmSleepAck", GAME_ID);
       
