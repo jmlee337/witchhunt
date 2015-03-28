@@ -123,5 +123,23 @@ Jasmine.onTest(function() {
       expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID})).toBeFalsy();
       expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID}).votes).toBe(0);
     });
+
+    it("can be called twice safely", function() {
+      var TARGET_ID = "target_id";
+      Players.insert({gameId: GAME_ID, userId: TARGET_ID, votes: 1});
+      Votes.insert({gameId: GAME_ID, userId: USER_ID, voteId: TARGET_ID});
+      Games.insert({_id: GAME_ID, view: "day"});
+      Roles.insert({gameId: GAME_ID, userId: USER_ID, lives: 1});
+
+      Meteor.call("clearVote", GAME_ID);
+
+      expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID})).toBeFalsy();
+      expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID}).votes).toBe(0);
+
+      Meteor.call("clearVote", GAME_ID);
+
+      expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID})).toBeFalsy();
+      expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID}).votes).toBe(0);
+    });
   });
 });

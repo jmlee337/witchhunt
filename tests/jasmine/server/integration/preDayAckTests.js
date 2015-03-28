@@ -30,14 +30,6 @@ Jasmine.onTest(function() {
       }).not.toThrow();
     });
 
-    it("requires player to not have successfully called preDayack", function() {
-      WakeAcks.insert({gameId: GAME_ID, userId: USER_ID});
-
-      expect(function() {
-        Meteor.call("preDayAck", GAME_ID);
-      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
-    });
-
     it("moves game if no more acks are needed", function() {
       Meteor.call("preDayAck", GAME_ID);
 
@@ -47,6 +39,20 @@ Jasmine.onTest(function() {
 
     it("doesn't move game if more acks are needed", function() {
       Players.insert({gameId: GAME_ID, userId: "other-id", alive: true});
+
+      Meteor.call("preDayAck", GAME_ID);
+
+      expect(Games.findOne(GAME_ID).view).toBe("preDay");
+      expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
+    });
+
+    it("short circuits if called a second time", function() {
+      Players.insert({gameId: GAME_ID, userId: "other-id", alive: true});
+
+      Meteor.call("preDayAck", GAME_ID);
+
+      expect(Games.findOne(GAME_ID).view).toBe("preDay");
+      expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
 
       Meteor.call("preDayAck", GAME_ID);
 

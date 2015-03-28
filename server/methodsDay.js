@@ -23,6 +23,9 @@ Meteor.methods({
     checkGameExists(gameId);
     checkGameState(gameId, "preNight");
     checkUserGame(gameId);
+    if (DayAcks.findOne({gameId: gameId, userId: Meteor.userId()})) {
+      return;
+    }
 
     if (dayAck(gameId, false)) {
       DayAcks.remove({gameId: gameId});
@@ -39,7 +42,9 @@ Meteor.methods({
     checkGameExists(gameId);
     checkGameState(gameId, "confirmSleep");
     checkUserGame(gameId);
-    var game = Games.findOne(gameId);
+    if (DayAcks.findOne({gameId: gameId, userId: Meteor.userId()})) {
+      return;
+    }
 
     if (dayAck(gameId, true)) {
       // This was the last Ack. Day is over, go to night
@@ -47,7 +52,7 @@ Meteor.methods({
 
       // Check for hunter/apprentice
       checkKilledPlayers(gameId, dayKilled);
-      
+
       // Give gravedigger killed player cards
       var gravedigger = Roles.findOne({role: "gravedigger", gameId: gameId, lives: {$gt: 0}});
       if (gravedigger) {
@@ -75,7 +80,7 @@ Meteor.methods({
 
       // Give gambler protection
       var gambler = Roles.findOne({role: "gambler", gameId: gameId, lives: {$gt: 0}});
-      if (gambler && (game.turn % 2 == 1) == gambler.secrets.odd) {
+      if (gambler && (Games.findOne(gameId).turn % 2 == 1) == gambler.secrets.odd) {
         NightShields.insert({
           userId: gambler.userId,
           gameId: gameId,
@@ -112,6 +117,9 @@ Meteor.methods({
     checkGameExists(gameId);
     checkGameState(gameId, "preDay");
     checkUserGame(gameId);
+    if (WakeAcks.findOne({gameId: gameId, userId: Meteor.userId()})) {
+      return;
+    }
 
     if (wakeAck(gameId, false)) {
       WakeAcks.remove({gameId: gameId});
@@ -128,6 +136,9 @@ Meteor.methods({
     checkGameExists(gameId);
     checkGameState(gameId, "confirmWake");
     checkUserGame(gameId);
+    if (WakeAcks.findOne({gameId: gameId, userId: Meteor.userId()})) {
+      return;
+    }
 
     if (wakeAck(gameId, true)) {
       checkKilledPlayers(gameId, NightKills.find({gameId: gameId}));

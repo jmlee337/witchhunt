@@ -46,6 +46,20 @@ Jasmine.onTest(function() {
 
       expect(Games.findOne(GAME_ID).view).toBe("demons");
     });
+
+    it("can be called twice safely", function() {
+      Meteor.call("demonVote", GAME_ID, TARGET_ID);
+
+      expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID}).votes).toBe(1);
+      expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID}).voteId).toBe(TARGET_ID);
+      expect(Games.findOne(GAME_ID).view).toBe("demons");
+
+      Meteor.call("demonVote", GAME_ID, TARGET_ID);
+
+      expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID}).votes).toBe(1);
+      expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID}).voteId).toBe(TARGET_ID);
+      expect(Games.findOne(GAME_ID).view).toBe("demons");
+    });
   });
 
   describe("demonVote with deciding vote", function() {

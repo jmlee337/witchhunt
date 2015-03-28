@@ -7,7 +7,7 @@ Jasmine.onTest(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
       Games.insert({_id: GAME_ID, userId: USER_ID, view: "setup"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: true});
-      Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "gambler"});
+      Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "gambler", secrets: {}});
     });
 
     afterEach(function() {
@@ -40,6 +40,22 @@ Jasmine.onTest(function() {
       Players.insert({gameId: GAME_ID, userId: "other-user-id", alive: true});
 
       Meteor.call("gamblerChoose", GAME_ID, true);
+
+      expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
+      expect(Games.findOne(GAME_ID).view).toBe("setup");
+    });
+
+    it("short circuits if called a second time", function() {
+      Players.insert({gameId: GAME_ID, userId: "other-user-id", alive: true});
+
+      Meteor.call("gamblerChoose", GAME_ID, true);
+
+      expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
+      expect(Games.findOne(GAME_ID).view).toBe("setup");
+
+      expect(function() {
+        Meteor.call("gamblerChoose", GAME_ID, true);
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
 
       expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
       expect(Games.findOne(GAME_ID).view).toBe("setup");

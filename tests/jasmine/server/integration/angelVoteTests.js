@@ -60,6 +60,20 @@ Jasmine.onTest(function() {
 
       expect(Games.findOne(GAME_ID).view).toBe("angels");
     });
+
+    it("can be called twice safely", function() {
+      Meteor.call("angelVote", GAME_ID, TARGET_ID);
+
+      expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID}).votes).toBe(1);
+      expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID}).voteId).toBe(TARGET_ID);
+      expect(Games.findOne(GAME_ID).view).toBe("angels");
+
+      Meteor.call("angelVote", GAME_ID, TARGET_ID);
+
+      expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID}).votes).toBe(1);
+      expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID}).voteId).toBe(TARGET_ID);
+      expect(Games.findOne(GAME_ID).view).toBe("angels");
+    });
   });
 
   describe("angelVote with deciding vote", function() {

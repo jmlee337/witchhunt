@@ -44,6 +44,20 @@ Jasmine.onTest(function() {
       expect(Games.findOne(GAME_ID).view).toBe("day");
     });
 
+    it("can be called twice safely", function() {
+      Meteor.call("dayVote", GAME_ID, VOTE_ID);
+
+      expect(Players.findOne({gameId: GAME_ID, userId: VOTE_ID}).votes).toBe(1);
+      expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID}).voteId).toBe(VOTE_ID);
+      expect(Games.findOne(GAME_ID).view).toBe("day");
+
+      Meteor.call("dayVote", GAME_ID, VOTE_ID);
+
+      expect(Players.findOne({gameId: GAME_ID, userId: VOTE_ID}).votes).toBe(1);
+      expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID}).voteId).toBe(VOTE_ID);
+      expect(Games.findOne(GAME_ID).view).toBe("day");
+    });
+
     it("clears timeout if vote is deciding", function() {
       var TIMEOUT_ID = 1000;
       spyOn(Meteor, "clearTimeout");

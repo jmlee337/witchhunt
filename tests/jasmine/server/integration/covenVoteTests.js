@@ -48,6 +48,20 @@ Jasmine.onTest(function() {
       expect(Games.findOne(GAME_ID).view).toBe("coven");
     });
 
+    it("can be called twice safely", function() {
+      Meteor.call("covenVote", GAME_ID, VOTE_ID);
+
+      expect(Players.findOne({gameId: GAME_ID, userId: VOTE_ID}).votes).toBe(1);
+      expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID}).voteId).toBe(VOTE_ID);
+      expect(Games.findOne(GAME_ID).view).toBe("coven");
+
+      Meteor.call("covenVote", GAME_ID, VOTE_ID);
+
+      expect(Players.findOne({gameId: GAME_ID, userId: VOTE_ID}).votes).toBe(1);
+      expect(Votes.findOne({gameId: GAME_ID, userId: USER_ID}).voteId).toBe(VOTE_ID);
+      expect(Games.findOne(GAME_ID).view).toBe("coven");
+    });
+
     it("clears votes if vote is deciding", function() {
       Players.insert({gameId: GAME_ID, userId: NO_KILL_ID, alive: true, votes: 1});
       Votes.insert({gameId: GAME_ID, userId: VOTE_ID, voteId: NO_KILL_ID});

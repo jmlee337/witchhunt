@@ -80,7 +80,7 @@ Meteor.methods({
       Roles.update({gameId: gameId, role: "acolyte"}, {$set: {
           secrets: {
               priest: {
-                  id: priest.userId, 
+                  id: priest.userId,
                   name: priest.name}}}});
     }
 
@@ -105,6 +105,9 @@ Meteor.methods({
     checkGameExists(gameId);
     checkGameState(gameId, "setup");
     checkUserGame(gameId);
+    if (WakeAcks.findOne({gameId: gameId, userId: Meteor.userId()})) {
+      return;
+    }
 
     setupAck(gameId);
   },
@@ -114,7 +117,10 @@ Meteor.methods({
     checkGameExists(gameId);
     checkGameState(gameId, "setup");
     checkUserGame(gameId);
-    checkUserRole(gameId, "apprentice");
+    var role = checkUserRole(gameId, "apprentice");
+    if (role.secrets.master) {
+      throw new Meteor.Error("state", "cannot call apprenticeChoose twice");
+    }
     check(master, Match.Where(function(master) {
       check(master, String);
       return master === "gravedigger" || master === "judge";
@@ -132,7 +138,10 @@ Meteor.methods({
     checkGameExists(gameId);
     checkGameState(gameId, "setup");
     checkUserGame(gameId);
-    checkUserRole(gameId, "gambler");
+    var role = checkUserRole(gameId, "gambler");
+    if (role.secrets.odd != null) {
+      throw new Meteor.Error("state", "cannot call gamblerChoose twice");
+    }
     check(odd, Boolean);
 
     Roles.update({userId: Meteor.userId(), gameId: gameId}, {$set: {secrets: {odd: odd}}});

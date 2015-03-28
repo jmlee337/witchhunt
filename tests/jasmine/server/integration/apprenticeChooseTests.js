@@ -7,7 +7,7 @@ Jasmine.onTest(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
       Games.insert({_id: GAME_ID, userId: USER_ID, view: "setup"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: true});
-      Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "apprentice"});
+      Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "apprentice", secrets: {}});
     });
 
     afterEach(function() {
@@ -57,6 +57,42 @@ Jasmine.onTest(function() {
           id: gravediggerId,
           name: gravediggerName,
           role: "gravedigger"
+        }
+      });
+    });
+
+    it("cannot be called twice", function() {
+      Players.insert({gameId: GAME_ID, userId: "other-user-id", alive: true});
+      var judgeId = "judge-user-id";
+      var judgeName = "judge-name";
+      Players.insert({gameId: GAME_ID, userId: judgeId, name: judgeName});
+      Roles.insert({gameId: GAME_ID, userId: judgeId, role: "judge"});
+      var gravediggerId = "gravedigger-user-id";
+      var gravediggerName = "gravedigger-name";
+      Players.insert({gameId: GAME_ID, userId: gravediggerId, name: gravediggerName});
+      Roles.insert({gameId: GAME_ID, userId: gravediggerId, role: "gravedigger"});
+
+      Meteor.call("apprenticeChoose", GAME_ID, "judge");
+
+      expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
+      expect(Roles.findOne({gameId: GAME_ID, userId: USER_ID, role: "apprentice"}).secrets).toEqual({
+        master: {
+          id: judgeId,
+          name: judgeName,
+          role: "judge"
+        }
+      });
+
+      expect(function() {
+        Meteor.call("apprenticeChoose", GAME_ID, "gravedigger");
+      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
+
+      expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
+      expect(Roles.findOne({gameId: GAME_ID, userId: USER_ID, role: "apprentice"}).secrets).toEqual({
+        master: {
+          id: judgeId,
+          name: judgeName,
+          role: "judge"
         }
       });
     });

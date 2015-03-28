@@ -15,14 +15,6 @@ Jasmine.onTest(function() {
       WakeAcks.remove({});
     });
 
-    it("requires player to not have already successfully called sleepAck", function() {
-      WakeAcks.insert({gameId: GAME_ID, userId: USER_ID});
-
-      expect(function() {
-        Meteor.call("setupAck", GAME_ID);
-      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
-    });
-
     it("moves game to confirmWake if all acks are done", function() {
       Meteor.call("setupAck", GAME_ID);
 
@@ -32,6 +24,20 @@ Jasmine.onTest(function() {
 
     it("doesn't move game if more acks are needed", function() {
       Players.insert({gameId: GAME_ID, userId: "other-user-id", alive: true});
+
+      Meteor.call("setupAck", GAME_ID);
+
+      expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
+      expect(Games.findOne(GAME_ID).view).toBe("setup");
+    });
+
+    it("short circuits if called a second time", function() {
+      Players.insert({gameId: GAME_ID, userId: "other-user-id", alive: true});
+
+      Meteor.call("setupAck", GAME_ID);
+
+      expect(WakeAcks.findOne({gameId: GAME_ID, userId: USER_ID})).toBeTruthy();
+      expect(Games.findOne(GAME_ID).view).toBe("setup");
 
       Meteor.call("setupAck", GAME_ID);
 
