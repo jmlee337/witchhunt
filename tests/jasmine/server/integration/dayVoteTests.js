@@ -12,24 +12,12 @@ Jasmine.onTest(function() {
     });
 
     afterEach(function() {
+      DayKills.remove({});
       Games.remove({});
       Players.remove({});
       Roles.remove({});
       Votes.remove({});
       Timeouts.remove({});
-    });
-
-    it("requires player to be alive", function() {
-      Players.update({gameId: GAME_ID, userId: USER_ID}, {$set: {alive: false}});
-
-      expect(function() {
-        Meteor.call("dayVote", GAME_ID, VOTE_ID);
-      }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
-
-      Players.update({gameId: GAME_ID, userId: USER_ID}, {$set: {alive: true}});
-      expect(function() {
-        Meteor.call("dayVote", GAME_ID, VOTE_ID);
-      }).not.toThrow();
     });
 
     it("adds vote", function() {
@@ -56,10 +44,23 @@ Jasmine.onTest(function() {
       expect(Games.findOne(GAME_ID).view).toBe("day");
     });
 
+    it("clears timeout if vote is deciding", function() {
+      var TIMEOUT_ID = 1000;
+      spyOn(Meteor, "clearTimeout");
+      Players.update({gameId: GAME_ID, userId: VOTE_ID}, {$set: {votes: 1}});
+      Roles.insert({gameId: GAME_ID, userId: VOTE_ID, lives: 1});
+      Timeouts.insert({gameId: GAME_ID, view: "day", id: TIMEOUT_ID});
+
+      Meteor.call("dayVote", GAME_ID, VOTE_ID);
+
+      expect(Meteor.clearTimeout.calls.count()).toBe(1);
+      expect(Meteor.clearTimeout.calls.argsFor(0)).toEqual([TIMEOUT_ID]);
+    });
+
     it("moves game to judge if vote is deciding, no kill, and judge is alive", function() {
       var TIMEOUT_ID = 1000;
       spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
-      Players.insert({gameId: GAME_ID, userId: NO_KILL_ID, votes: 1, alive: true}); // two real live players total
+      Players.insert({gameId: GAME_ID, userId: NO_KILL_ID, votes: 1, alive: true});
       Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "judge", lives: 1});
 
       Meteor.call("dayVote", GAME_ID, NO_KILL_ID);
@@ -71,7 +72,7 @@ Jasmine.onTest(function() {
     it("moves game to judge if vote is deciding, no kill, and judge is dead", function() {
       spyOn(Meteor, "setTimeout");
       var deadId = "dead-id";
-      Players.insert({gameId: GAME_ID, userId: NO_KILL_ID, votes: 1, alive: true}); // two real live players total
+      Players.insert({gameId: GAME_ID, userId: NO_KILL_ID, votes: 1, alive: true});
       Roles.insert({gameId: GAME_ID, userId: deadId, role: "judge", lives: 0});
 
       Meteor.call("dayVote", GAME_ID, NO_KILL_ID);
@@ -81,11 +82,15 @@ Jasmine.onTest(function() {
     });
 
     it("moves game to preNight and kills player if vote is deciding", function() {
-      Players.update({gameId: GAME_ID, userId: VOTE_ID}, {$set: {votes: 1}}); // two real live players total
+      var voteName = "voteName";
+      Players.update({gameId: GAME_ID, userId: VOTE_ID}, {$set: {name: voteName, votes: 1}});
       Roles.insert({gameId: GAME_ID, userId: VOTE_ID, lives: 1});
 
       Meteor.call("dayVote", GAME_ID, VOTE_ID);
 
+      expect(DayKills.findOne({
+          gameId: GAME_ID, userId: VOTE_ID, name: voteName, died: true, cod: "lynch"
+      })).toBeTruthy();
       expect(Games.findOne(GAME_ID).view).toBe("preNight");
       expect(Players.findOne({gameId: GAME_ID, userId: VOTE_ID}).alive).toBe(false);
       expect(Roles.findOne({gameId: GAME_ID, userId: VOTE_ID}).lives).toBe(0);

@@ -25,16 +25,16 @@ Meteor.methods({
     var witches = Roles.find({gameId: gameId, alignment: "coven", lives: {$gt: 0}});
     var numCoven = witches.count();
     if (vote(gameId, userId, numCoven)) {
-      clearViewTimeout(gameId, "coven");
+      clearPlayerVotes(gameId);
       if (userId != NO_KILL_ID) {
         nightKillPlayer(gameId, userId);
       }
-      clearPlayerVotes(gameId);
       if (numCoven == 1 && witches.fetch()[0].secrets.lastStand) {
         var secrets = witches.fetch()[0].secrets;
         secrets.lastStand = false;
         Roles.update({gameId: gameId, alignment: "coven", lives: {$gt: 0}}, {$set: {secrets: secrets}});
       } else {
+        clearViewTimeout(gameId, "coven");
         goToNextRole(gameId);
       }
     }
@@ -67,8 +67,8 @@ Meteor.methods({
     }
 
     var numAngels = Roles.find({
-        gameId: gameId, 
-        $or: [{alignment: "town"}, {alignment: "holy"}], 
+        gameId: gameId,
+        $or: [{alignment: "town"}, {alignment: "holy"}],
         lives: {$lt: 1}}).count();
     if (vote(gameId, userId, numAngels)) {
       clearViewTimeout(gameId, "angels");
