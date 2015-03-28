@@ -9,37 +9,7 @@ goToNextRole = function(gameId) {
 // Otherwise falls through to the next available role
 goToRole = function(gameId, roleName) {
   if (!maybeGoToRole(gameId, roleName)) {
-    if (roleName === NIGHT_ROLES[NIGHT_ROLES.length - 1]) {
-      var targets = NightTargets.find({gameId: gameId});
-      targets.forEach(function(target) {
-        if (target.died) {
-          Players.update({userId: target.userId, gameId: gameId}, {$set: {alive: false}});
-        }
-        NightKills.insert({
-          userId: target.userId,
-          gameId: gameId,
-          name: target.name,
-          died: target.died
-        });
-      });
-
-      // Check for oracle
-      var killed = NightKills.find({gameId: gameId, died: true});
-      var oracle = Roles.findOne({gameId: gameId, role: "oracle"}); // oracle still gets info when dead
-      if (oracle && killed.count() > 0) {
-        var secrets = oracle.secrets;
-        killed.forEach(function(player) {
-          if (Roles.findOne({userId: player.userId, gameId: gameId, alignment: "holy"})) {
-            secrets.holies.push({id: player.userId, name: player.name});
-          }
-        });
-        Roles.update({userId: oracle.userId, gameId: gameId}, {$set: {secrets: secrets}});
-      }
-
-      Games.update(gameId, {$set: {view: "preDay"}});
-    } else {
-      goToRole(gameId, nextRole(roleName));
-    }
+    goToRole(gameId, nextRole(roleName));
   }
 };
 
@@ -64,6 +34,41 @@ nextRole = function(roleName) {
 maybeGoToRole = function(gameId, roleName) {
   if (roleName === "preNight") {
     Games.update(gameId, {$set: {view: "preNight"}});
+    return true;
+  }
+  if (roleName === "preDay") {
+    var targets = NightTargets.find({gameId: gameId});
+    targets.forEach(function(target) {
+      var shield = NightShields.findOne({userId: target.userId, gameId: gameId});
+      if (shield && shield.shields > 0) {
+        NightShields.update({userId: target.userId, gameId: gameId}, {$inc: {shields: -1}});
+      } else {
+        Roles.update({userId: target.userId, gameId: gameId}, {$inc: {lives: -1}});
+      }
+      var died = Roles.findOne({userId: target.userId, gameId: gameId}).lives <= 0;
+      if (died) {
+        Players.update({userId: target.userId, gameId: gameId}, {$set: {alive: false}});
+      }
+      NightKills.upsert(
+          {userId: target.userId, gameId: gameId, name: target.name}, 
+          {$set: {died: died}});
+    });
+
+    // Check for oracle
+    var killed = NightKills.find({gameId: gameId, died: true});
+    // oracle still gets info when dead
+    var oracle = Roles.findOne({gameId: gameId, role: "oracle"});
+    if (oracle && killed.count() > 0) {
+      var secrets = oracle.secrets;
+      killed.forEach(function(player) {
+        if (Roles.findOne({userId: player.userId, gameId: gameId, alignment: "holy"})) {
+          secrets.holies.push({id: player.userId, name: player.name});
+        }
+      });
+      Roles.update({userId: oracle.userId, gameId: gameId}, {$set: {secrets: secrets}});
+    }
+
+    Games.update(gameId, {$set: {view: "preDay"}});
     return true;
   }
   if (roleName === "demons") {

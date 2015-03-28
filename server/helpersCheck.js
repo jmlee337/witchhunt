@@ -29,9 +29,11 @@ checkUserDead = function(gameId) {
 };
 
 checkUserRole = function(gameId, roleName) {
-  if (!Roles.findOne({userId: Meteor.userId(), gameId: gameId, role: roleName})) {
+  var role = Roles.findOne({userId: Meteor.userId(), gameId: gameId, role: roleName});
+  if (!role) {
     throw new Meteor.Error("argument", "can only be called by role: ", roleName);
   }
+  return role;
 };
 
 checkUserCoven = function(gameId) {

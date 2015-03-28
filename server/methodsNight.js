@@ -81,20 +81,24 @@ Meteor.methods({
     checkGameState(gameId, "priest");
     checkUserGame(gameId);
     checkUserLive(gameId);
-    checkUserRole(gameId, "priest");
+    var role = checkUserRole(gameId, "priest");
     check(userId, String);
+
+    if (role.secrets.hasInvestigated) {
+      return;
+    }
 
     if (userId === NO_KILL_ID) {
       goToNextRole(gameId);
     } else {
       var player = checkTarget(gameId, userId);
 
+      var playerRole = Roles.findOne({userId: userId, gameId: gameId});
       var secrets = Roles.findOne({userId: Meteor.userId(), gameId: gameId}).secrets;
-      var target = Roles.findOne({userId: userId, gameId: gameId});
       secrets.investigations.push({
         id: userId,
         name: player.name,
-        isWitch: target.alignment === "coven"
+        isWitch: playerRole.alignment === "coven"
       });
       secrets.hasInvestigated = true;
       Roles.update({userId: Meteor.userId(), gameId: gameId}, {$set: {secrets: secrets}});
@@ -106,11 +110,14 @@ Meteor.methods({
     checkGameState(gameId, "hunter");
     checkUserGame(gameId);
     checkUserLive(gameId);
-    checkUserRole(gameId, "hunter");
+    var hunterRole = checkUserRole(gameId, "hunter");
     check(userId, String);
-    var secrets = hunter.secrets;
+    var secrets = hunterRole.secrets;
     if (!secrets.tonightWeHunt) {
       throw new Meteor.Error("state", "no my son, your time has not yet come");
+    }
+    if (secrets.used) {
+      throw new Meteor.Error("state", "already used your hunt: how did you even get here");
     }
 
     clearViewTimeout(gameId, "hunter");
