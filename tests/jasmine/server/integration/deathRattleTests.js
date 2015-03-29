@@ -261,7 +261,7 @@ Jasmine.onTest(function() {
 
       var fanatic = Roles.findOne({gameId: GAME_ID, userId: otherId, role: "fanatic"});
       expect(fanatic.lives).toBe(2);
-      expect(fanatic.secrets.investigated).toBe(true);
+      expect(fanatic.secrets.priestDied).toBe(true);
     });
 
     it("clears acks", function() {

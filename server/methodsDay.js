@@ -108,7 +108,7 @@ Meteor.methods({
       var fanatic = Roles.findOne({gameId: gameId, role: "fanatic"});
       if (fanatic) {
         var fanaticSecrets = fanatic.secrets;
-        fanaticSecrets.investigated = false;
+        fanaticSecrets.priestDied = false;
         Roles.update({gameId: gameId, role: "fanatic"}, {$set: {secrets: fanaticSecrets}});
       }
 
@@ -245,7 +245,7 @@ Meteor.methods({
           var fanatic = Roles.findOne({gameId: gameId, role: "fanatic"});
           if (fanatic) {
             var fanaticSecrets = fanatic.secrets;
-            fanaticSecrets.investigated = true;
+            fanaticSecrets.priestDied = true;
             Roles.update(
                 {gameId: gameId, role: "fanatic"},
                 {$set: {secrets: fanaticSecrets}, $inc: {lives: 1}});
@@ -368,7 +368,7 @@ dayKillPlayer = function(gameId, userId, cod) {
       var fanatic = Roles.findOne({gameId: gameId, role: "fanatic"});
       if (fanatic) {
         var fanaticSecrets = fanatic.secrets;
-        fanaticSecrets.investigated = true;
+        fanaticSecrets.priestDied = true;
         Roles.update(
             {gameId: gameId, role: "fanatic"},
             {$set: {secrets: fanaticSecrets}, $inc: {lives: 1}});

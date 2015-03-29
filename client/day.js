@@ -251,10 +251,10 @@ Template.judge.onDestroyed(function() {
 Template.preNight.helpers({
   resultDescs: function() {
     var dayKills = DayKills.find();
-    if (dayKills.count() == 0) {
-      return ["No one died."];
-    }
     var arr = [];
+    if (dayKills.count() == 0) {
+      arr.push("No one died.");
+    }
     dayKills.forEach(function(victim) {
       var desc = victim.name;
       switch (victim.cod) {
@@ -285,7 +285,7 @@ Template.preNight.helpers({
       arr.push(desc);
     });
     var fanatic = Roles.findOne({userId: Meteor.userId(), role: "fanatic"});
-    if (fanatic && fanatic.secrets.investigated) {
+    if (fanatic && fanatic.secrets.priestDied) {
       arr.push("You gained an extra life from the priest.");
     }
     return arr;
@@ -350,10 +350,10 @@ Template.preDay.onRendered(function () {
 Template.preDay.helpers({
   resultDescs: function() {
     var nightKills = NightKills.find();
-    if (nightKills.count() == 0) {
-      return ["No one died."];
-    }
     var arr = [];
+    if (nightKills.count() == 0) {
+      arr.push("No one died.");
+    }
     var deadPriestId;
     var oracle = Roles.findOne({userId: Meteor.userId(), role: "oracle"});
     if (oracle && oracle.secrets.deadPriest) {

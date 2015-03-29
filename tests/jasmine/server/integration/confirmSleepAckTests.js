@@ -328,13 +328,13 @@ Jasmine.onTest(function() {
 
     it("clears fanatic", function() {
       var otherId = "other-id";
-      Roles.insert({gameId: GAME_ID, userId: otherId, role: "fanatic", secrets: {investigated: true}});
+      Roles.insert({gameId: GAME_ID, userId: otherId, role: "fanatic", secrets: {priestDied: true}});
 
       Meteor.call("confirmSleepAck", GAME_ID);
 
       expect(Roles.findOne({
           gameId: GAME_ID, userId: otherId, role: "fanatic"
-      }).secrets.investigated).toBeFalsy();
+      }).secrets.priestDied).toBeFalsy();
     });
 
     it("moves to gravedigger", function() {
