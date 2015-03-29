@@ -192,7 +192,7 @@ Template.role.helpers({
         alignTitle: alignmentTitle(user.alignment),
         alignDesc: alignmentDesc(user.alignment),
         roleTitle: roleTitle(user.role),
-        roleDesc: roleDesc(user.role), 
+        roleDesc: roleDesc(user.role),
         secrets: secretsDesc(secrets),
         oldMaster: oldMaster
     };
@@ -558,8 +558,8 @@ roleDesc = function(role) {
       return "At the start of the game you may select odd or even nights. On those nights you " +
           "are protected from one kill.";
     case "oracle":
-      return "If a member of the Village Clergy is killed at night you will be notified of " +
-          "their holy status when their death is announced in the morning.";
+      return "If the Priest is killed at night you will be notified when their death is " +
+          "announced in the morning.";
     case "peepingTom":
       return "At the start of the game you learn that a random player is a Village Peasant.";
     case "bod":
