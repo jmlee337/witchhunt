@@ -172,15 +172,15 @@ insertRole = function(id, gameId, alignment, role) {
 };
 
 genRolePairs = function(n) {
-  var arr = [{alignment: "holy", role: "priest"}, {alignment: "holy", role: "acolyte"}];
-  var roleArr = ROLES.slice(0, n - 2);
+  var arr = [{alignment: "holy", role: "priest"}];
+  var roleArr = ROLES.slice(0, n - 1);
   var numScum = n < 9 ? 2 : 3;
   for (var i = 0; i < numScum; i++) {
     var index = Math.floor(Math.random() * roleArr.length);
     var spliced = roleArr.splice(index, 1);
     arr.push({alignment: "coven", role: spliced[0]});
   }
-  for (var j = 0; j < n - (numScum + 2); j++) {
+  for (var j = 0; j < n - (numScum + 1); j++) {
     arr.push({alignment: "town", role: roleArr[j]});
   }
   return shuffle(arr);

@@ -15,22 +15,6 @@ Jasmine.onTest(function() {
       var alignCounts = {town: 0, coven: 0};
       switch (n) {
         case 12:
-          var hunter = Roles.findOne({gameId: GAME_ID, role: "hunter", lives: 1});
-          expect(hunter).toBeDefined();
-          expect(hunter.userId).toBeDefined();
-          expect(Players.findOne({gameId: GAME_ID, userId: hunter.userId})).toBeTruthy();
-          userIdSet.add(hunter.userId);
-          expect(hunter.secrets).toEqual({});
-          alignCounts[hunter.alignment]++;
-        case 11:
-          var dob = Roles.findOne({gameId: GAME_ID, role: "dob", lives: 1});
-          expect(dob).toBeDefined();
-          expect(dob.userId).toBeDefined();
-          expect(Players.findOne({gameId: GAME_ID, userId: dob.userId})).toBeTruthy();
-          userIdSet.add(dob.userId);
-          expect(dob.secrets).toEqual({});
-          alignCounts[dob.alignment]++;
-        case 10:
           var bod = Roles.findOne({gameId: GAME_ID, role: "bod", lives: 1});
           expect(bod).toBeDefined();
           expect(bod.userId).toBeDefined();
@@ -38,6 +22,22 @@ Jasmine.onTest(function() {
           userIdSet.add(bod.userId);
           expect(bod.secrets).toEqual({});
           alignCounts[bod.alignment]++;
+        case 11:
+          var hunter = Roles.findOne({gameId: GAME_ID, role: "hunter", lives: 1});
+          expect(hunter).toBeDefined();
+          expect(hunter.userId).toBeDefined();
+          expect(Players.findOne({gameId: GAME_ID, userId: hunter.userId})).toBeTruthy();
+          userIdSet.add(hunter.userId);
+          expect(hunter.secrets).toEqual({});
+          alignCounts[hunter.alignment]++;
+        case 10:
+          var oracle = Roles.findOne({gameId: GAME_ID, role: "oracle", lives: 1});
+          expect(oracle).toBeDefined();
+          expect(oracle.userId).toBeDefined();
+          expect(Players.findOne({gameId: GAME_ID, userId: oracle.userId})).toBeTruthy();
+          userIdSet.add(oracle.userId);
+          expect(oracle.secrets).toEqual({});
+          alignCounts[oracle.alignment]++;
         case 9:
           var peepingTom = Roles.findOne({gameId: GAME_ID, role: "peepingTom", lives: 1});
           expect(peepingTom).toBeDefined();
@@ -52,13 +52,13 @@ Jasmine.onTest(function() {
           expect(Players.findOne({gameId: GAME_ID, userId: innocentId}).name).toBe(peepingTom.secrets.innocent.name);
           alignCounts[peepingTom.alignment]++;
         case 8:
-          var oracle = Roles.findOne({gameId: GAME_ID, role: "oracle", lives: 1});
-          expect(oracle).toBeDefined();
-          expect(oracle.userId).toBeDefined();
-          expect(Players.findOne({gameId: GAME_ID, userId: oracle.userId})).toBeTruthy();
-          userIdSet.add(oracle.userId);
-          expect(oracle.secrets).toEqual({});
-          alignCounts[oracle.alignment]++;
+          var fanatic = Roles.findOne({gameId: GAME_ID, role: "fanatic", lives: 1});
+          expect(fanatic).toBeDefined();
+          expect(fanatic.userId).toBeDefined();
+          expect(Players.findOne({gameId: GAME_ID, userId: fanatic.userId})).toBeTruthy();
+          userIdSet.add(fanatic.userId);
+          expect(fanatic.secrets).toEqual({});
+          alignCounts[fanatic.alignment]++;
         case 7:
           var priest = Roles.findOne({gameId: GAME_ID, role: "priest", lives: 1, alignment: "holy"});
           expect(priest).toBeDefined();
@@ -66,32 +66,6 @@ Jasmine.onTest(function() {
           expect(Players.findOne({gameId: GAME_ID, userId: priest.userId})).toBeTruthy();
           userIdSet.add(priest.userId);
           expect(priest.secrets).toEqual({investigations: []});
-
-          var acolyte = Roles.findOne({gameId: GAME_ID, role: "acolyte", lives: 1, alignment: "holy"});
-          expect(acolyte).toBeDefined();
-          expect(acolyte.userId).toBeDefined();
-          expect(Players.findOne({gameId: GAME_ID, userId: acolyte.userId})).toBeTruthy();
-          userIdSet.add(acolyte.userId);
-          expect(acolyte.secrets.priest).toEqual({
-            id: priest.userId, 
-            name: Players.findOne({gameId: GAME_ID, userId: priest.userId}).name
-          });
-
-          var survivalist = Roles.findOne({gameId: GAME_ID, role: "survivalist", lives: 2});
-          expect(survivalist).toBeDefined();
-          expect(survivalist.userId).toBeDefined();
-          expect(Players.findOne({gameId: GAME_ID, userId: survivalist.userId})).toBeTruthy();
-          userIdSet.add(survivalist.userId);
-          expect(survivalist.secrets).toEqual({});
-          alignCounts[survivalist.alignment]++;
-
-          var gravedigger = Roles.findOne({gameId: GAME_ID, role: "gravedigger", lives: 1});
-          expect(gravedigger).toBeDefined();
-          expect(gravedigger.userId).toBeDefined();
-          expect(Players.findOne({gameId: GAME_ID, userId: gravedigger.userId})).toBeTruthy();
-          userIdSet.add(gravedigger.userId);
-          expect(gravedigger.secrets).toEqual({});
-          alignCounts[gravedigger.alignment]++;
 
           var judge = Roles.findOne({gameId: GAME_ID, role: "judge", lives: 1});
           expect(judge).toBeDefined();
@@ -101,6 +75,14 @@ Jasmine.onTest(function() {
           expect(judge.secrets).toEqual({});
           alignCounts[judge.alignment]++;
 
+          var gravedigger = Roles.findOne({gameId: GAME_ID, role: "gravedigger", lives: 1});
+          expect(gravedigger).toBeDefined();
+          expect(gravedigger.userId).toBeDefined();
+          expect(Players.findOne({gameId: GAME_ID, userId: gravedigger.userId})).toBeTruthy();
+          userIdSet.add(gravedigger.userId);
+          expect(gravedigger.secrets).toEqual({});
+          alignCounts[gravedigger.alignment]++;
+
           var apprentice = Roles.findOne({gameId: GAME_ID, role: "apprentice", lives: 1});
           expect(apprentice).toBeDefined();
           expect(apprentice.userId).toBeDefined();
@@ -108,6 +90,22 @@ Jasmine.onTest(function() {
           userIdSet.add(apprentice.userId);
           expect(apprentice.secrets).toEqual({});
           alignCounts[apprentice.alignment]++;
+
+          var survivalist = Roles.findOne({gameId: GAME_ID, role: "survivalist", lives: 2});
+          expect(survivalist).toBeDefined();
+          expect(survivalist.userId).toBeDefined();
+          expect(Players.findOne({gameId: GAME_ID, userId: survivalist.userId})).toBeTruthy();
+          userIdSet.add(survivalist.userId);
+          expect(survivalist.secrets).toEqual({});
+          alignCounts[survivalist.alignment]++;
+
+          var dob = Roles.findOne({gameId: GAME_ID, role: "dob", lives: 1});
+          expect(dob).toBeDefined();
+          expect(dob.userId).toBeDefined();
+          expect(Players.findOne({gameId: GAME_ID, userId: dob.userId})).toBeTruthy();
+          userIdSet.add(dob.userId);
+          expect(dob.secrets).toEqual({});
+          alignCounts[dob.alignment]++;
 
           var gambler = Roles.findOne({gameId: GAME_ID, role: "gambler", lives: 1});
           expect(gambler).toBeDefined();
@@ -124,27 +122,27 @@ Jasmine.onTest(function() {
       switch (n) {
         case 7:
           expect(alignCounts.coven).toBe(2);
-          expect(alignCounts.town).toBe(3);
+          expect(alignCounts.town).toBe(4);
           break;
         case 8:
           expect(alignCounts.coven).toBe(2);
-          expect(alignCounts.town).toBe(4);
+          expect(alignCounts.town).toBe(5);
           break;
         case 9:
           expect(alignCounts.coven).toBe(3);
-          expect(alignCounts.town).toBe(4);
+          expect(alignCounts.town).toBe(5);
           break;
         case 10:
           expect(alignCounts.coven).toBe(3);
-          expect(alignCounts.town).toBe(5);
+          expect(alignCounts.town).toBe(6);
           break;
         case 11:
           expect(alignCounts.coven).toBe(3);
-          expect(alignCounts.town).toBe(6);
+          expect(alignCounts.town).toBe(7);
           break;
         case 12:
           expect(alignCounts.coven).toBe(3);
-          expect(alignCounts.town).toBe(7);
+          expect(alignCounts.town).toBe(8);
           break;
         default:
           fail();
@@ -180,7 +178,7 @@ Jasmine.onTest(function() {
 
     it("requires at least 7 players", function() {
       addPlayers(5); // 6 total
-      
+
       expect(function() {
         Meteor.call("startGame", GAME_ID);
       }).toThrow(jasmine.objectContaining({errorType: "Meteor.Error"}));
@@ -245,7 +243,7 @@ Jasmine.onTest(function() {
     it("gives correct roles for 11 players", function() {
       addPlayers(10) // 11 total
 
-      Meteor.call("startGame", GAME_ID); 
+      Meteor.call("startGame", GAME_ID);
 
       verifyRoles(11);
     });

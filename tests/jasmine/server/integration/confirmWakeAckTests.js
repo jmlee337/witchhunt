@@ -210,6 +210,17 @@ Jasmine.onTest(function() {
       expect(Roles.findOne({gameId: GAME_ID, userId: otherId, lives: 1}).role).toBe("gravedigger");
     });
 
+    it("clears fanatic", function() {
+      var otherId = "other-id";
+      Roles.insert({gameId: GAME_ID, userId: otherId, role: "fanatic", secrets: {investigated: true}});
+
+      Meteor.call("confirmWakeAck", GAME_ID);
+
+      expect(Roles.findOne({
+          gameId: GAME_ID, userId: otherId, role: "fanatic"
+      }).secrets.investigated).toBeFalsy();
+    });
+
     it("moves to day", function() {
       Meteor.call("confirmWakeAck", GAME_ID);
 

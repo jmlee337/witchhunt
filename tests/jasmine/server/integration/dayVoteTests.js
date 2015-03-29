@@ -106,8 +106,6 @@ Jasmine.onTest(function() {
           gameId: GAME_ID, userId: VOTE_ID, name: voteName, died: true, cod: "lynch"
       })).toBeTruthy();
       expect(Games.findOne(GAME_ID).view).toBe("preNight");
-      expect(Players.findOne({gameId: GAME_ID, userId: VOTE_ID}).alive).toBe(false);
-      expect(Roles.findOne({gameId: GAME_ID, userId: VOTE_ID}).lives).toBe(0);
     });
   });
 });

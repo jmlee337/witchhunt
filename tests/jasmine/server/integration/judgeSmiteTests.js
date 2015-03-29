@@ -42,18 +42,6 @@ Jasmine.onTest(function() {
       Meteor.call("judgeSmite", GAME_ID, TARGET_ID);
 
       expect(DayKills.findOne({gameId: GAME_ID, userId: TARGET_ID, died: true, cod: "smite"})).toBeTruthy();
-      expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID}).alive).toBe(false);
-      expect(Roles.findOne({gameId: GAME_ID, userId: TARGET_ID}).lives).toBe(0);
-    });
-
-    it("smites through all lives", function() {
-      Roles.update({gameId: GAME_ID, userId: TARGET_ID}, {$set: {lives: 30}});
-
-      Meteor.call("judgeSmite", GAME_ID, TARGET_ID);
-
-      expect(DayKills.findOne({gameId: GAME_ID, userId: TARGET_ID, died: true, cod: "smite"})).toBeTruthy();
-      expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID}).alive).toBe(false);
-      expect(Roles.findOne({gameId: GAME_ID, userId: TARGET_ID}).lives).toBe(0);
     });
 
     it("moves to preNight with kill", function() {

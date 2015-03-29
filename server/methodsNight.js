@@ -94,6 +94,13 @@ Meteor.methods({
       var player = checkTarget(gameId, userId);
 
       var playerRole = Roles.findOne({userId: userId, gameId: gameId});
+      if (playerRole.role === "fanatic") {
+        var targetSecrets = playerRole.secrets;
+        targetSecrets.investigated = true;
+        Roles.update(
+            {userId: userId, gameId: gameId},
+            {$set: {secrets: targetSecrets}, $inc: {lives: 1}});
+      }
       var secrets = Roles.findOne({userId: Meteor.userId(), gameId: gameId}).secrets;
       secrets.investigations.push({
         id: userId,

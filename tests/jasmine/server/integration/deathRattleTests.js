@@ -126,8 +126,6 @@ Jasmine.onTest(function() {
     it("blesses target", function() {
       Meteor.call("deathRattle", GAME_ID, TARGET_ID);
 
-      expect(Roles.findOne({gameId: GAME_ID, userId: TARGET_ID}).lives).toBe(2);
-      expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID, name: TARGET_NAME}).alive).toBe(true);
       expect(DayKills.findOne({
           gameId: GAME_ID, userId: TARGET_ID, name: TARGET_NAME, cod: "bod"
       }).died).toBe(false);
@@ -167,8 +165,6 @@ Jasmine.onTest(function() {
     it("spites target", function() {
       Meteor.call("deathRattle", GAME_ID, TARGET_ID);
 
-      expect(Roles.findOne({gameId: GAME_ID, userId: TARGET_ID}).lives).toBe(0);
-      expect(Players.findOne({gameId: GAME_ID, userId: TARGET_ID, name: TARGET_NAME}).alive).toBe(false);
       expect(DayKills.findOne({
           gameId: GAME_ID, userId: TARGET_ID, name: TARGET_NAME, cod: "dob"
       }).died).toBe(true);
@@ -254,6 +250,18 @@ Jasmine.onTest(function() {
       expect(NightKills.findOne({
           gameId: GAME_ID, userId: TARGET_ID, name: TARGET_NAME, cod: "dob"
       }).died).toBe(true);
+    });
+
+    it("updates fanatic", function() {
+      var otherId = "other-id";
+      Roles.insert({gameId: GAME_ID, userId: otherId, role: "fanatic", lives: 1, secrets: {}});
+      Roles.update({gameId: GAME_ID, userId: TARGET_ID}, {$set: {role: "priest"}});
+
+      Meteor.call("deathRattle", GAME_ID, TARGET_ID);
+
+      var fanatic = Roles.findOne({gameId: GAME_ID, userId: otherId, role: "fanatic"});
+      expect(fanatic.lives).toBe(2);
+      expect(fanatic.secrets.investigated).toBe(true);
     });
 
     it("clears acks", function() {

@@ -104,6 +104,14 @@ Meteor.methods({
         Roles.update({alignment: "coven", gameId: gameId, lives: {$gt: 0}}, {$set: {secrets: witchSecrets}});
       }
 
+      // clear fanatic
+      var fanatic = Roles.findOne({gameId: gameId, role: "fanatic"});
+      if (fanatic) {
+        var fanaticSecrets = fanatic.secrets;
+        fanaticSecrets.investigated = false;
+        Roles.update({gameId: gameId, role: "fanatic"}, {$set: {secrets: fanaticSecrets}});
+      }
+
       clearPlayerVotes(gameId);
       DayKills.remove({gameId: gameId});
       DayAcks.remove({gameId: gameId});
@@ -142,6 +150,12 @@ Meteor.methods({
 
     if (wakeAck(gameId, true)) {
       checkKilledPlayers(gameId, NightKills.find({gameId: gameId}));
+      var fanatic = Roles.findOne({gameId: gameId, role: "fanatic"});
+      if (fanatic) {
+        var fanaticSecrets = fanatic.secrets;
+        fanaticSecrets.investigated = false;
+        Roles.update({gameId: gameId, role: "fanatic"}, {$set: {secrets: fanaticSecrets}});
+      }
 
       clearPlayerVotes(gameId);
       NightShields.remove({gameId: gameId});
@@ -223,6 +237,16 @@ Meteor.methods({
       var victimRole = Roles.findOne({userId: targetId, gameId: gameId});
       if (victimRole.lives < 1) {
         Players.update({userId: targetId, gameId: gameId}, {$set: {alive: false}});
+        if (victimRole.role === "priest") {
+          var fanatic = Roles.findOne({gameId: gameId, role: "fanatic"});
+          if (fanatic) {
+            var fanaticSecrets = fanatic.secrets;
+            fanaticSecrets.investigated = true;
+            Roles.update(
+                {gameId: gameId, role: "fanatic"},
+                {$set: {secrets: fanaticSecrets}, $inc: {lives: 1}});
+          }
+        }
       }
       var victim = Players.findOne({userId: targetId, gameId: gameId});
       NightKills.insert({
@@ -330,12 +354,22 @@ dayKillPlayer = function(gameId, userId, cod) {
     Roles.update({userId: userId, gameId: gameId}, {$set: {lives: 0}});
   } else if (cod === "bod") {
     Roles.update({userId: userId, gameId: gameId}, {$inc: {lives: 1}});
-  } else {
+  } else { // dob or lynch
     Roles.update({userId: userId, gameId: gameId}, {$inc: {lives: -1}});
   }
   var victimRole = Roles.findOne({userId: userId, gameId: gameId});
   if (victimRole.lives < 1) {
     Players.update({userId: userId, gameId: gameId}, {$set: {alive: false}});
+    if (victimRole.role === "priest") {
+      var fanatic = Roles.findOne({gameId: gameId, role: "fanatic"});
+      if (fanatic) {
+        var fanaticSecrets = fanatic.secrets;
+        fanaticSecrets.investigated = true;
+        Roles.update(
+            {gameId: gameId, role: "fanatic"},
+            {$set: {secrets: fanaticSecrets}, $inc: {lives: 1}});
+      }
+    }
   }
   var victim = Players.findOne({userId: userId, gameId: gameId});
   DayKills.insert({

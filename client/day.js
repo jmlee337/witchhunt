@@ -284,6 +284,10 @@ Template.preNight.helpers({
       }
       arr.push(desc);
     });
+    var fanatic = Roles.findOne({userId: Meteor.userId(), role: "fanatic"});
+    if (fanatic && fanatic.secrets.investigated) {
+      arr.push("You gained an extra life from the priest.");
+    }
     return arr;
   },
 
@@ -377,6 +381,10 @@ Template.preDay.helpers({
       }
       arr.push(desc);
     });
+    var fanatic = Roles.findOne({userId: Meteor.userId(), role: "fanatic"});
+    if (fanatic && fanatic.secrets.investigated) {
+      arr.push("You gained an extra life from the priest.");
+    }
     return arr;
   },
 
@@ -535,6 +543,8 @@ roleTitle = function(role) {
       return "Dirty Old Bastard";
     case "hunter":
       return "Hunter";
+    case "fanatic":
+      return "Fanatic";
   }
 }
 
@@ -568,6 +578,9 @@ roleDesc = function(role) {
       return "When your death is announced you may kill a player.";
     case "hunter":
       return "The first time a player survives a kill you may kill a player the following night.";
+    case "fanatic":
+      return "If the Priest checks you or dies during the day, you will be notified and gain an " +
+          "extra life";
   }
 };
 

@@ -113,6 +113,16 @@ Jasmine.onTest(function() {
       expect(investigations[0]).toEqual({id: TARGET_ID, name: TARGET_NAME, isWitch: false});
     });
 
+    it("sets investigation for fanatic", function() {
+      Roles.update({gameId: GAME_ID, userId: TARGET_ID, lives: 1}, {$set: {role: "fanatic"}});
+
+      Meteor.call("priestVote", GAME_ID, TARGET_ID);
+
+      var fanatic = Roles.findOne({gameId: GAME_ID, userId: TARGET_ID, alignment: "coven"});
+      expect(fanatic.lives).toBe(2);
+      expect(fanatic.secrets.investigated).toBe(true);
+    });
+
     it("sets hasInvestigated true", function() {
       Meteor.call("priestVote", GAME_ID, TARGET_ID);
 
