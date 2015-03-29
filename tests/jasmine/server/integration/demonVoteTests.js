@@ -63,11 +63,9 @@ Jasmine.onTest(function() {
   });
 
   describe("demonVote with deciding vote", function() {
-    var TIMEOUT_ID = 1000;
-
     beforeEach(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
-      spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
+      spyOn(Meteor, "setTimeout");
       Games.insert({_id: GAME_ID, view: "demons"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: false});
       Players.insert({gameId: GAME_ID, userId: TARGET_ID, alive: true});
@@ -91,13 +89,9 @@ Jasmine.onTest(function() {
     });
 
     it("clears timeout", function() {
-      spyOn(Meteor, "clearTimeout");
-      Timeouts.insert({gameId: GAME_ID, view: "demons", id: TIMEOUT_ID});
-
       Meteor.call("demonVote", GAME_ID, TARGET_ID);
 
-      expect(Meteor.clearTimeout.calls.count()).toBe(1);
-      expect(Meteor.clearTimeout.calls.argsFor(0)).toEqual([TIMEOUT_ID]);
+      expect(Timeouts.findOne({gameId: GAME_ID, view: "demons"})).toBeTruthy();
     });
 
     it("doesn't add curse for NO_KILL", function() {
@@ -114,20 +108,12 @@ Jasmine.onTest(function() {
       expect(NightCurse.findOne({gameId: GAME_ID, userId: TARGET_ID})).toBeTruthy();
     });
 
-    it("moves to fake angels if no angels", function() {
-      Meteor.call("demonVote", GAME_ID, TARGET_ID);
-
-      expect(Games.findOne(GAME_ID).view).toBe("angels");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "angels"})).toBeFalsy();
-    });
-
-    it("moves to real angels if angels", function() {
+    it("moves to angels", function() {
       Roles.insert({gameId: GAME_ID, userId: "whatever", alignment: "town", lives: 0});
 
       Meteor.call("demonVote", GAME_ID, TARGET_ID);
 
       expect(Games.findOne(GAME_ID).view).toBe("angels");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "angels"}).id).toBe(TIMEOUT_ID);
     });
   });
 });

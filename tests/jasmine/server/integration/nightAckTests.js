@@ -1,12 +1,11 @@
 Jasmine.onTest(function() {
   var GAME_ID = "game-id";
-  var TIMEOUT_ID = 1000;
   var USER_ID = "user-id";
 
   describe("nightAck", function() {
     beforeEach(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
-      spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
+      spyOn(Meteor, "setTimeout");
       Games.insert({_id: GAME_ID, view: "gravedigger"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: true});
       Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "gravedigger", lives: 1, secrets: {}});
@@ -30,7 +29,7 @@ Jasmine.onTest(function() {
   describe("nightAck for gravedigger", function() {
     beforeEach(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
-      spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
+      spyOn(Meteor, "setTimeout");
       Games.insert({_id: GAME_ID, view: "gravedigger"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: true});
       Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "gravedigger", lives: 1, secrets: {}});
@@ -57,36 +56,24 @@ Jasmine.onTest(function() {
     });
 
     it("clears timeout", function() {
-      spyOn(Meteor, "clearTimeout");
-      Timeouts.insert({gameId: GAME_ID, view: "gravedigger", id: TIMEOUT_ID});
-
       Meteor.call("nightAck", GAME_ID);
 
-      expect(Meteor.clearTimeout.calls.count()).toBe(1);
-      expect(Meteor.clearTimeout.calls.argsFor(0)).toEqual([TIMEOUT_ID]);
+      expect(Timeouts.findOne({gameId: GAME_ID, view: "gravedigger"})).toBeTruthy();
     });
 
-    it("moves to real demons if there are demons", function() {
+    it("moves to demons", function() {
       Roles.insert({gameId: GAME_ID, userId: "whatever", alignment: "coven", lives: 0});
 
       Meteor.call("nightAck", GAME_ID);
 
       expect(Games.findOne(GAME_ID).view).toBe("demons");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "demons"}).id).toBe(TIMEOUT_ID);
-    });
-
-    it("moves to fake demons if there are no demons", function() {
-      Meteor.call("nightAck", GAME_ID);
-
-      expect(Games.findOne(GAME_ID).view).toBe("demons");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "demons"})).toBeFalsy();
     });
   });
 
   describe("nightAck for priest", function() {
     beforeEach(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
-      spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
+      spyOn(Meteor, "setTimeout");
       Games.insert({_id: GAME_ID, view: "priest"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: true});
       Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "priest", lives: 1, secrets: {}});
@@ -113,16 +100,12 @@ Jasmine.onTest(function() {
     });
 
     it("clears timeout", function() {
-      spyOn(Meteor, "clearTimeout");
-      Timeouts.insert({gameId: GAME_ID, view: "priest", id: TIMEOUT_ID});
-
       Meteor.call("nightAck", GAME_ID);
 
-      expect(Meteor.clearTimeout.calls.count()).toBe(1);
-      expect(Meteor.clearTimeout.calls.argsFor(0)).toEqual([TIMEOUT_ID]);
+      expect(Timeouts.findOne({gameId: GAME_ID, view: "priest"})).toBeTruthy();
     });
 
-    it("moves to real hunter if hunter can hunt and is alive", function() {
+    it("moves to hunter if hunter can hunt", function() {
       var hunterId = "hunter-id";
       Roles.insert({
           gameId: GAME_ID, userId: hunterId, role: "hunter", lives: 1, secrets: {tonightWeHunt: true}
@@ -131,19 +114,6 @@ Jasmine.onTest(function() {
       Meteor.call("nightAck", GAME_ID);
 
       expect(Games.findOne(GAME_ID).view).toBe("hunter");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "hunter"}).id).toBe(TIMEOUT_ID);
-    });
-
-    it("moves to fake hunter if hunter can hunt and is dead", function() {
-      var hunterId = "hunter-id";
-      Roles.insert({
-          gameId: GAME_ID, userId: hunterId, role: "hunter", lives: 0, secrets: {tonightWeHunt: true}
-      });
-
-      Meteor.call("nightAck", GAME_ID);
-
-      expect(Games.findOne(GAME_ID).view).toBe("hunter");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "hunter"})).toBeFalsy();
     });
 
     it("moves to preDay if hunter cannot hunt", function() {

@@ -164,7 +164,12 @@ Meteor.methods({
       NightKills.remove({gameId: gameId});
       WakeAcks.remove({gameId: gameId});
 
-      var timeoutId = Meteor.setTimeout(function() {
+      Meteor.setTimeout(function() {
+        var timestamp = Timeouts.findOne({gameId: gameId, view: "day"});
+        if (timestamp) {
+          Timeouts.remove({gameId: gameId, view: "day"});
+          return;
+        }
         if (Games.findOne(gameId).view != "day") {
           return;
         }
@@ -177,7 +182,6 @@ Meteor.methods({
           Games.update(gameId, {$set: {view: "preNight"}});
         }
       }, DURATION_MS);
-      Timeouts.upsert({gameId: gameId, view: "day"}, {$set: {id: timeoutId}});
       Games.update(gameId, {$set: {view: "day", dayEndMs: Date.now() + DURATION_MS}, $inc: {turn: 1}});
     }
   },

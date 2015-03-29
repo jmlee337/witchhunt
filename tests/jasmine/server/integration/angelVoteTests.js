@@ -77,11 +77,9 @@ Jasmine.onTest(function() {
   });
 
   describe("angelVote with deciding vote", function() {
-    var TIMEOUT_ID = 1000;
-
     beforeEach(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
-      spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
+      spyOn(Meteor, "setTimeout");
       Games.insert({_id: GAME_ID, view: "angels"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: false});
       Players.insert({gameId: GAME_ID, userId: TARGET_ID, alive: true});
@@ -105,13 +103,9 @@ Jasmine.onTest(function() {
     });
 
     it("clears timeout", function() {
-      spyOn(Meteor, "clearTimeout");
-      Timeouts.insert({gameId: GAME_ID, view: "angels", id: TIMEOUT_ID});
-
       Meteor.call("angelVote", GAME_ID, TARGET_ID);
 
-      expect(Meteor.clearTimeout.calls.count()).toBe(1);
-      expect(Meteor.clearTimeout.calls.argsFor(0)).toEqual([TIMEOUT_ID]);
+      expect(Timeouts.findOne({gameId: GAME_ID, view: "angels"})).toBeTruthy();
     });
 
     it("doesn't add shield for NO_KILL", function() {
@@ -134,7 +128,6 @@ Jasmine.onTest(function() {
       Meteor.call("angelVote", GAME_ID, TARGET_ID);
 
       expect(Games.findOne(GAME_ID).view).toBe("coven");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "coven"}).id).toBe(TIMEOUT_ID);
     });
   });
 });

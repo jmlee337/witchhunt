@@ -2,11 +2,10 @@ Jasmine.onTest(function() {
   describe("confirmWakeAck", function() {
     var GAME_ID = "game-id";
     var USER_ID = "user-id";
-    var TIMEOUT_ID = 1000;
 
     beforeEach(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
-      spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
+      spyOn(Meteor, "setTimeout");
       Games.insert({_id: GAME_ID, userId: USER_ID, view: "confirmWake"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: true});
     });
@@ -225,7 +224,6 @@ Jasmine.onTest(function() {
       Meteor.call("confirmWakeAck", GAME_ID);
 
       expect(Games.findOne(GAME_ID).view).toBe("day");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "day"}).id).toBe(TIMEOUT_ID);
     });
   });
 });

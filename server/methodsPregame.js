@@ -6,12 +6,16 @@ Meteor.methods({
       throw new Meteor.Error("state", "no player id available");
     }
 
-    var gameId = xkcd_pw_gen();
-    Games.insert({
-      _id: gameId,
-      userId: userId,
-      view: "lobby"
-    });
+    if (!MULTIPLE_GAMES && Games.findOne()) {
+      var gameId = Games.findOne()._id;
+    } else {
+      var gameId = xkcd_pw_gen();
+      Games.insert({
+        _id: gameId,
+        userId: userId,
+        view: "lobby"
+      });
+    }
 
     insertNewPlayer(userId, gameId, name);
 

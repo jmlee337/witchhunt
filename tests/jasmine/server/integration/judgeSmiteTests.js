@@ -22,14 +22,9 @@ Jasmine.onTest(function() {
     });
 
     it("clears timeout", function() {
-      spyOn(Meteor, "clearTimeout");
-      var timeoutId = 1000;
-      Timeouts.insert({gameId: GAME_ID, view: "judge", id: timeoutId});
-
       Meteor.call("judgeSmite", GAME_ID, TARGET_ID);
 
-      expect(Meteor.clearTimeout.calls.count()).toBe(1);
-      expect(Meteor.clearTimeout.calls.argsFor(0)).toEqual([timeoutId]);
+      expect(Timeouts.findOne({gameId: GAME_ID, view: "judge"})).toBeTruthy();
     });
 
     it("doesn't kill anyone for NO_KILL", function() {

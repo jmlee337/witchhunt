@@ -2,11 +2,10 @@ Jasmine.onTest(function() {
   describe("confirmSleepAck", function() {
     var GAME_ID = "game-id";
     var USER_ID = "user-id";
-    var TIMEOUT_ID = 1000;
 
     beforeEach(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
-      spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
+      spyOn(Meteor, "setTimeout");
       Games.insert({_id: GAME_ID, userId: USER_ID, view: "confirmSleep"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: true});
     });
@@ -18,7 +17,6 @@ Jasmine.onTest(function() {
       DayKills.remove({});
       NightShields.remove({});
       Roles.remove({});
-      Timeouts.remove({});
     });
 
     it("requires player to be alive", function() {
@@ -339,24 +337,13 @@ Jasmine.onTest(function() {
       }).secrets.investigated).toBeFalsy();
     });
 
-    it("moves to real gravedigger if alive", function() {
+    it("moves to gravedigger", function() {
       var graveId = "grave-id";
       Roles.insert({gameId: GAME_ID, userId: graveId, role: "gravedigger", lives: 1, secrets: {}});
 
       Meteor.call("confirmSleepAck", GAME_ID);
 
       expect(Games.findOne(GAME_ID).view).toBe("gravedigger");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "gravedigger"}).id).toBe(TIMEOUT_ID);
-    });
-
-    it("moves to fake gravedigger if dead", function() {
-      var graveId = "grave-id";
-      Roles.insert({gameId: GAME_ID, userId: graveId, role: "gravedigger", lives: 0});
-
-      Meteor.call("confirmSleepAck", GAME_ID);
-
-      expect(Games.findOne(GAME_ID).view).toBe("gravedigger");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "gravedigger"})).toBeFalsy();
     });
   });
 });

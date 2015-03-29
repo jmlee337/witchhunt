@@ -2,10 +2,7 @@
  * External (public)
  */
 clearViewTimeout = function(gameId, view) {
-  var timeout = Timeouts.findOne({gameId: gameId, view: view});
-  if (timeout) {
-    Meteor.clearTimeout(timeout.id);
-  }
+  Timeouts.insert({gameId: gameId, view: view});
 };
 
 numLivePlayers = function(gameId) {
@@ -26,7 +23,7 @@ wakeAck = function(gameId, excludeKilled) {
   }
 
   WakeAcks.insert({
-    userId: userId, 
+    userId: userId,
     gameId: gameId,
   });
 

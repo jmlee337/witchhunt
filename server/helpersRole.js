@@ -50,7 +50,7 @@ maybeGoToRole = function(gameId, roleName) {
         Players.update({userId: target.userId, gameId: gameId}, {$set: {alive: false}});
       }
       NightKills.upsert(
-          {userId: target.userId, gameId: gameId, name: target.name}, 
+          {userId: target.userId, gameId: gameId, name: target.name},
           {$set: {died: died}});
     });
 
@@ -82,8 +82,8 @@ maybeGoToRole = function(gameId, roleName) {
   }
   if (roleName === "angels") {
     if (Roles.find({
-        gameId: gameId, 
-        $or: [{alignment: "town"}, {alignment: "holy"}], 
+        gameId: gameId,
+        $or: [{alignment: "town"}, {alignment: "holy"}],
         lives: {$lt: 1}}).count() > 0) {
       setRoleTimeout(gameId, roleName);
     } else {
@@ -136,7 +136,12 @@ setRandomTimeout = function(gameId) {
 };
 
 setRoleTimeout = function(gameId, roleName) {
-  var timeoutId = Meteor.setTimeout(function() {
+  Meteor.setTimeout(function() {
+    var timestamp = Timeouts.findOne({gameId: gameId, view: roleName});
+    if (timestamp) {
+      Timeouts.remove({gameId: gameId, view: roleName});
+      return;
+    }
     var view = Games.findOne(gameId).view;
     if (view != roleName) {
       return;
@@ -164,6 +169,5 @@ setRoleTimeout = function(gameId, roleName) {
     }
     goToNextRole(gameId);
   }, TIMEOUT_MS + GRACE_MS);
-  Timeouts.upsert({gameId: gameId, view: roleName}, {$set: {id: timeoutId}});
   Games.update(gameId, {$set: {dayEndMs: Date.now() + TIMEOUT_MS + GRACE_MS}});
 };

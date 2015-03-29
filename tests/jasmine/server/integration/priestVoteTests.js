@@ -6,7 +6,7 @@ Jasmine.onTest(function() {
   describe("priestVote with NO_KILL", function() {
     beforeEach(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
-      spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
+      spyOn(Meteor, "setTimeout");
       Games.insert({_id: GAME_ID, view: "priest"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: true});
       Roles.insert({gameId: GAME_ID, userId: USER_ID, role: "priest", lives: 1, secrets: {investigations: []}});
@@ -16,10 +16,9 @@ Jasmine.onTest(function() {
       Games.remove({});
       Players.remove({});
       Roles.remove({});
-      Timeouts.remove({});
     });
 
-    it("moves to real hunter if hunter can hunt and is alive", function() {
+    it("moves to hunter if hunter can hunt", function() {
       var hunterId = "hunter-id";
       Roles.insert({
           gameId: GAME_ID, userId: hunterId, role: "hunter", lives: 1, secrets: {tonightWeHunt: true}
@@ -28,19 +27,6 @@ Jasmine.onTest(function() {
       Meteor.call("priestVote", GAME_ID, NO_KILL_ID);
 
       expect(Games.findOne(GAME_ID).view).toBe("hunter");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "hunter"}).id).toBe(TIMEOUT_ID);
-    });
-
-    it("moves to fake hunter if hunter can hunt and is dead", function() {
-      var hunterId = "hunter-id";
-      Roles.insert({
-          gameId: GAME_ID, userId: hunterId, role: "hunter", lives: 0, secrets: {tonightWeHunt: true}
-      });
-
-      Meteor.call("priestVote", GAME_ID, NO_KILL_ID);
-
-      expect(Games.findOne(GAME_ID).view).toBe("hunter");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "hunter"})).toBeFalsy();
     });
 
     it("moves to preDay if hunter cannot hunt", function() {

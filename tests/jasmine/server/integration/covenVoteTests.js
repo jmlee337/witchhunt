@@ -3,11 +3,10 @@ Jasmine.onTest(function() {
     var GAME_ID = "game-id";
     var USER_ID = "user-id";
     var VOTE_ID = "vote-id";
-    var TIMEOUT_ID = 1000;
 
     beforeEach(function() {
       spyOn(Meteor, "userId").and.returnValue(USER_ID);
-      spyOn(Meteor, "setTimeout").and.returnValue(TIMEOUT_ID);
+      spyOn(Meteor, "setTimeout");
       Games.insert({_id: GAME_ID, view: "coven"});
       Players.insert({gameId: GAME_ID, userId: USER_ID, alive: true});
       Players.insert({gameId: GAME_ID, userId: VOTE_ID, alive: true});
@@ -90,48 +89,32 @@ Jasmine.onTest(function() {
     });
 
     it("clears timeout and moves if not last stand", function() {
-      spyOn(Meteor, "clearTimeout");
-      Timeouts.insert({gameId: GAME_ID, view: "coven", id: TIMEOUT_ID});
       Players.update({gameId: GAME_ID, userId: VOTE_ID}, {$set: {votes: 1}});
 
       Meteor.call("covenVote", GAME_ID, VOTE_ID);
 
-      expect(Meteor.clearTimeout.calls.count()).toBe(1);
-      expect(Meteor.clearTimeout.calls.argsFor(0)).toEqual([TIMEOUT_ID]);
+      expect(Timeouts.findOne({gameId: GAME_ID, view: "coven"}));
       expect(Games.findOne(GAME_ID).view).not.toBe("coven");
     });
 
     it("goes to last stand if applicable", function() {
-      spyOn(Meteor, "clearTimeout");
-      Timeouts.insert({gameId: GAME_ID, view: "coven", id: TIMEOUT_ID});
       Roles.update({gameId: GAME_ID, userId: VOTE_ID}, {$set: {alignment: "town"}});
       Roles.update({gameId: GAME_ID, userId: USER_ID}, {$set: {secrets: {lastStand: true}}});
 
       Meteor.call("covenVote", GAME_ID, VOTE_ID);
 
-      expect(Meteor.clearTimeout.calls.any()).toBe(false);
       expect(Games.findOne(GAME_ID).view).toBe("coven");
       expect(Roles.findOne({gameId: GAME_ID, userId: USER_ID}).secrets.lastStand).toBe(false);
+      expect(Timeouts.find({gameId: GAME_ID}).count()).toBe(0);
     });
 
-    it("moves to fake priest if priest is dead", function() {
-      Roles.insert({gameId: GAME_ID, userId: "whatever", role: "priest", lives: 0});
-      Players.insert({gameId: GAME_ID, userId: NO_KILL_ID, alive: true, votes: 1});
-
-      Meteor.call("covenVote", GAME_ID, NO_KILL_ID);
-
-      expect(Games.findOne(GAME_ID).view).toBe("priest");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "priest"})).toBeFalsy();
-    });
-
-    it("moves to real demons if demons", function() {
+    it("moves to priest", function() {
       Roles.insert({gameId: GAME_ID, userId: "whatever", role: "priest", lives: 1});
       Players.insert({gameId: GAME_ID, userId: NO_KILL_ID, alive: true, votes: 1});
 
       Meteor.call("covenVote", GAME_ID, NO_KILL_ID);
 
       expect(Games.findOne(GAME_ID).view).toBe("priest");
-      expect(Timeouts.findOne({gameId: GAME_ID, view: "priest"}).id).toBe(TIMEOUT_ID);
     });
   });
 });
