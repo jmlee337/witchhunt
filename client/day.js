@@ -12,7 +12,7 @@ Template.body.helpers({
 Template.startScreen.helpers({
   roles: function() {
     var arr = [];
-    ROLES.forEach(function(role) {
+    ALL_ROLES.forEach(function(role) {
       arr.push({roleTitle: roleTitle(role), roleDesc: roleDesc(role)});
     });
     return arr;
@@ -96,6 +96,21 @@ Template.lobby.helpers({
 
   isOwner: function() {
     return Games.findOne().userId === Meteor.userId();
+  },
+
+  canStart: function() {
+    var count = Players.find().count();
+    return count >= 7 && count <= 12;
+  },
+
+  roles: function() {
+    var count = Players.find().count();
+    var arr = [];
+    for (var i = 0; i < count; i++) {
+      var role = ALL_ROLES[i];
+      arr.push({roleTitle: roleTitle(role), roleDesc: roleDesc(role)});
+    }
+    return arr;
   }
 });
 

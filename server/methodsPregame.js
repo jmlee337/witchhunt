@@ -19,6 +19,12 @@ Meteor.methods({
 
     insertNewPlayer(userId, gameId, name);
 
+    if (!ONLY_REAL_PLAYERS) {
+      for (var i = 0; i < NUM_FAKE_PLAYERS; i++) {
+        insertNewPlayer("playerId" + i, gameId, "player " + i);
+      }
+    }
+
     return gameId;
   },
 

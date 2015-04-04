@@ -117,10 +117,24 @@
       <li>{{name}}</li>
     {{/each}}
   </ul>
+  <div class="subhead">
+    Roles
+  </div>
+  {{#each roles}}
+    <div class="card">
+      <div class="headline">
+        {{roleTitle}}
+      </div>
+      <div class="text">
+        {{roleDesc}}
+      </div>
+    </div>
+  {{/each}}
+  <div class="space8"></div>
   {{#if isOwner}}
     <div class="beforeButtonSection"></div>
     <div class="buttonSection">
-      <div class="button startGame">Start Game</div>
+      <div class="{{#if canStart}}button{{else}}disabledButton{{/if}} startGame">Start Game</div>
     </div>
   {{/if}}
 </template>
